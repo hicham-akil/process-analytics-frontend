@@ -10,9 +10,7 @@ import axios from "axios";
 // ─── Config ──────────────────────────────────────────────────────────────────
 const API_BASE = "http://localhost:8080/api";
 const WS_URL   = "http://localhost:8080/api/ws-jfc1";
-const WS_TOPIC = "/topic/indicateurs";
 
-// ─── Seuils d'alerte ─────────────────────────────────────────────────────────
 const SEUILS = {
   se:              { max: 1.5 },
   syn:             { max: 1.8 },
@@ -25,18 +23,86 @@ const SEUILS = {
   consoVapeur:     { max: 1.2 },
 };
 
-const status = (key, val) => {
-  if (val == null) return "gray";
-  const s = SEUILS[key];
-  if (!s) return "green";
-  if (s.max != null) return val > s.max ? "amber" : "green";
-  if (s.min != null) return val < s.min ? "amber" : "green";
-  return "green";
-};
-
 const fmt = (v, d = 4) => v != null ? Number(v).toFixed(d) : "—";
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Alert Panel ─────────────────────────────────────────────────────────────
+
+function AlertPanel({ alertes, onAcquitter, onClose }) {
+  return (
+    <div className="fixed top-16 right-4 z-50 w-80 bg-slate-900 border border-red-500/30 rounded-xl shadow-2xl shadow-red-500/10 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-red-500/10">
+        <span className="text-[10px] font-bold tracking-widest uppercase text-red-400">
+          ⚠ Alertes Actives ({alertes.length})
+        </span>
+        <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-sm">✕</button>
+      </div>
+      <div className="max-h-96 overflow-y-auto">
+        {alertes.length === 0 ? (
+          <div className="p-4 text-center text-slate-600 text-xs">Aucune alerte active</div>
+        ) : (
+          alertes.map((a) => (
+            <div key={a.id}
+              className={`p-3 border-b border-white/5 ${
+                a.severite === "CRITICAL" ? "bg-red-500/5" : "bg-amber-500/5"
+              }`}>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                      a.severite === "CRITICAL"
+                        ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                    }`}>
+                      {a.severite}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-200">
+                      {a.typeIndicateur}
+                    </span>
+                  </div>
+                  <p className="text-[9px] text-slate-400">
+                    Valeur: <span className="text-slate-200 font-mono">{a.valeur}</span>
+                    {" "}/ Seuil: <span className="text-slate-200 font-mono">{a.seuil}</span>
+                  </p>
+                  <p className="text-[9px] text-slate-600 mt-0.5">
+                    {new Date(a.date).toLocaleTimeString("fr-MA")}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onAcquitter(a.id)}
+                  className="text-[9px] font-bold px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors shrink-0">
+                  ACK
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AlertBadge({ count, onClick }) {
+  const [blink, setBlink] = useState(true);
+  useEffect(() => {
+    if (count === 0) return;
+    const id = setInterval(() => setBlink(v => !v), 800);
+    return () => clearInterval(id);
+  }, [count]);
+
+  if (count === 0) return null;
+  return (
+    <button onClick={onClick}
+      className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all ${
+        blink
+          ? "border-red-500/60 bg-red-500/20 text-red-400"
+          : "border-red-500/20 bg-red-500/5 text-red-500"
+      }`}>
+      <span className="text-[9px] font-bold tracking-widest">⚠ {count} ALERTE{count > 1 ? "S" : ""}</span>
+    </button>
+  );
+}
+
+// ─── Existing Sub-components ─────────────────────────────────────────────────
 
 function LivePill({ connected, pulse }) {
   return (
@@ -76,25 +142,20 @@ function SectionHead({ icon, label }) {
 }
 
 function GypseCard({ label, value, seuil }) {
-  const s = value != null && value > seuil ? "amber" : "green";
-  const isAmber = s === "amber";
+  const isAmber = value != null && value > seuil;
   const pct = value != null ? Math.min((value / (seuil * 1.5)) * 100, 100) : 0;
   return (
     <div className={`relative overflow-hidden rounded-lg bg-slate-900 border border-white/5 p-4 ${
       isAmber ? "border-t-2 border-t-amber-400" : "border-t-2 border-t-emerald-400"
     }`}>
       <div className="flex justify-between items-start mb-2">
-        <span className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500">
-          Loss {label}
-        </span>
+        <span className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500">Loss {label}</span>
         <span className={`text-lg font-bold ${isAmber ? "text-amber-400" : "text-emerald-400"}`}>
           {isAmber ? "↑" : "↓"}
         </span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className={`text-4xl font-bold tracking-tight font-mono ${
-          isAmber ? "text-amber-400" : "text-slate-100"
-        }`}>
+        <span className={`text-4xl font-bold tracking-tight font-mono ${isAmber ? "text-amber-400" : "text-slate-100"}`}>
           {fmt(value, 2)}
         </span>
         <span className="text-slate-500 font-bold text-sm">%</span>
@@ -141,9 +202,7 @@ function YieldCard({ label, keyName, value, minSeuil }) {
           }`}>
             {isAmber ? "Sous seuil" : "Optimal"}
           </span>
-          <span className="text-[9px] text-slate-500">
-            Seuil min: {(minSeuil * 100).toFixed(0)}%
-          </span>
+          <span className="text-[9px] text-slate-500">Seuil min: {(minSeuil * 100).toFixed(0)}%</span>
         </div>
       </div>
       <RingMeter value={value} />
@@ -181,7 +240,6 @@ function ConsumptionCard({ label, value, unit, seuil }) {
   );
 }
 
-// ─── Navigation ───────────────────────────────────────────────────────────────
 const navItems = [
   { icon: "◉", label: "Real-time Monitor", active: true },
   { icon: "⬡", label: "Gypse Analysis" },
@@ -193,81 +251,119 @@ const navItems = [
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 
 export default function JFC1Dashboard() {
-  const [indicateur, setIndicateur]   = useState(null);
-  const [capHistory, setCapHistory]   = useState([]);
-  const [connected, setConnected]     = useState(false);
-  const [pulse, setPulse]             = useState(true);
-  const [lastUpdate, setLastUpdate]   = useState(null);
+  const [indicateur, setIndicateur] = useState(null);
+  const [capHistory, setCapHistory] = useState([]);
+  const [connected, setConnected]   = useState(false);
+  const [pulse, setPulse]           = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
+
+  // ── Alertes state ─────────────────────────────────────────────
+  const [alertes, setAlertes]           = useState([]);
+  const [showAlertPanel, setShowAlertPanel] = useState(false);
+
   const stompRef = useRef(null);
 
-  // Pulse ticker pour le badge LIVE quand déconnecté
   useEffect(() => {
     const id = setInterval(() => setPulse(v => !v), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // Mise à jour données + historique CAP
   const applyIndicateur = useCallback((data) => {
     setIndicateur(data);
     setLastUpdate(new Date());
-    // Flash pulse
     setPulse(true);
     setTimeout(() => setPulse(false), 1000);
-
     if (data.cap != null) {
       const label = new Date(data.date).toLocaleTimeString("fr-MA", {
         hour: "2-digit", minute: "2-digit"
       });
-      setCapHistory(prev => {
-        const next = [...prev, { time: label, cap: data.cap, target: 1.0 }];
-        return next.slice(-20); // garder 20 derniers points
-      });
+      setCapHistory(prev => [...prev, { time: label, cap: data.cap, target: 1.0 }].slice(-20));
     }
   }, []);
 
-  // Chargement initial — dernier relevé
+  // Chargement initial
   useEffect(() => {
     axios.get(`${API_BASE}/indicateurs/derniers`)
       .then(res => { if (res.data) applyIndicateur(res.data); })
-      .catch(() => console.warn("Pas de données initiales"));
+      .catch(() => {});
+
+    // Charger alertes actives initiales
+    axios.get(`${API_BASE}/alertes/actives`)
+      .then(res => setAlertes(res.data))
+      .catch(() => {});
   }, [applyIndicateur]);
 
-  // Connexion WebSocket STOMP
+  // WebSocket
   useEffect(() => {
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       reconnectDelay: 5000,
       onConnect: () => {
         setConnected(true);
-        client.subscribe(WS_TOPIC, (msg) => {
-          const data = JSON.parse(msg.body);
-          applyIndicateur(data);
+
+        // Indicateurs temps réel
+        client.subscribe("/topic/indicateurs", (msg) => {
+          applyIndicateur(JSON.parse(msg.body));
+        });
+
+        // Alertes temps réel
+        client.subscribe("/topic/alertes", (msg) => {
+          const nouvellesAlertes = JSON.parse(msg.body);
+          setAlertes(prev => {
+            const ids = new Set(prev.map(a => a.id));
+            const nouvelles = nouvellesAlertes.filter(a => !ids.has(a.id));
+            return [...nouvelles, ...prev].slice(0, 50);
+          });
+          setShowAlertPanel(true); // ouvrir automatiquement
         });
       },
       onDisconnect: () => setConnected(false),
-      onStompError:  () => setConnected(false),
+      onStompError: () => setConnected(false),
     });
     client.activate();
     stompRef.current = client;
     return () => client.deactivate();
   }, [applyIndicateur]);
 
+  // Acquitter une alerte
+  const acquitter = async (id) => {
+    try {
+      await axios.patch(`${API_BASE}/alertes/${id}/acquitter`);
+      setAlertes(prev => prev.filter(a => a.id !== id));
+    } catch (e) {
+      console.error("Erreur acquittement", e);
+    }
+  };
+
+  const alertesNonAcquittees = alertes.filter(a => !a.acquittee);
   const d = indicateur;
 
   return (
     <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
 
+      {/* Alert Panel overlay */}
+      {showAlertPanel && (
+        <AlertPanel
+          alertes={alertesNonAcquittees}
+          onAcquitter={acquitter}
+          onClose={() => setShowAlertPanel(false)}
+        />
+      )}
+
       {/* Topbar */}
-      <header className="flex items-center justify-between px-5 h-14 bg-slate-950/95 border-b border-white/5 sticky top-0 z-50 backdrop-blur">
+      <header className="flex items-center justify-between px-5 h-14 bg-slate-950/95 border-b border-white/5 sticky top-0 z-40 backdrop-blur">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-emerald-400 rounded flex items-center justify-center font-black text-[#060d1a] text-sm">
-            O
-          </div>
+          <div className="w-7 h-7 bg-emerald-400 rounded flex items-center justify-center font-black text-[#060d1a] text-sm">O</div>
           <span className="text-[13px] font-black text-emerald-400 tracking-[.15em] uppercase">
             JFC1 — Acide Phosphorique
           </span>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
+          {/* Badge alertes */}
+          <AlertBadge
+            count={alertesNonAcquittees.length}
+            onClick={() => setShowAlertPanel(v => !v)}
+          />
           <LivePill connected={connected} pulse={pulse} />
           <span className="text-[10px] text-slate-400 tracking-wide hidden sm:block">
             WebSocket: {connected ? "Connecté" : "Déconnecté"}
@@ -285,9 +381,7 @@ export default function JFC1Dashboard() {
 
         {/* Sidebar */}
         <nav className="w-52 flex-shrink-0 bg-[#060d1a] border-r border-white/5 flex flex-col py-4 overflow-y-auto">
-          <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 px-4 mb-3">
-            Navigation
-          </p>
+          <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 px-4 mb-3">Navigation</p>
           {navItems.map((item) => (
             <button key={item.label}
               className={`flex items-center gap-2.5 px-4 py-2.5 text-[10px] font-bold tracking-[.06em] uppercase border-l-2 transition-all text-left ${
@@ -300,11 +394,26 @@ export default function JFC1Dashboard() {
             </button>
           ))}
 
-          {/* Statut connexion sidebar */}
+          {/* Alertes sidebar */}
           <div className="mt-6 px-4">
-            <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 mb-3">
-              Système
-            </p>
+            <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 mb-3">Alertes</p>
+            <button
+              onClick={() => setShowAlertPanel(v => !v)}
+              className={`w-full flex items-center justify-between py-2 px-3 rounded-lg border transition-all ${
+                alertesNonAcquittees.length > 0
+                  ? "border-red-500/30 bg-red-500/10 text-red-400"
+                  : "border-white/5 bg-slate-800 text-slate-500"
+              }`}>
+              <span className="text-[9px] font-bold uppercase">Actives</span>
+              <span className="text-[9px] font-bold font-mono">
+                {alertesNonAcquittees.length}
+              </span>
+            </button>
+          </div>
+
+          {/* Système */}
+          <div className="mt-4 px-4">
+            <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 mb-3">Système</p>
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] font-bold text-slate-500 uppercase">Backend</span>
@@ -326,8 +435,6 @@ export default function JFC1Dashboard() {
 
         {/* Canvas */}
         <main className="flex-1 overflow-y-auto p-5 bg-[#060d1a]">
-
-          {/* Pas de données */}
           {!d && (
             <div className="flex items-center justify-center h-64 text-slate-600 text-sm">
               En attente des données Python...
@@ -335,7 +442,6 @@ export default function JFC1Dashboard() {
           )}
 
           {d && <>
-            {/* Pertes Gypse */}
             <SectionHead icon="⬡" label="Pertes Gypse" />
             <div className="grid grid-cols-3 gap-3 mb-5">
               <GypseCard label="SE"  value={d.se}     seuil={SEUILS.se.max} />
@@ -343,16 +449,12 @@ export default function JFC1Dashboard() {
               <GypseCard label="INT" value={d.intVal} seuil={SEUILS.intVal.max} />
             </div>
 
-            {/* Rendements */}
             <SectionHead icon="◈" label="Rendements" />
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <YieldCard keyName="RC" label="Rendement Concentration"
-                value={d.rc} minSeuil={SEUILS.rc.min} />
-              <YieldCard keyName="RI" label="Rendement Incorporation"
-                value={d.ri} minSeuil={SEUILS.ri.min} />
+              <YieldCard keyName="RC" label="Rendement Concentration" value={d.rc} minSeuil={SEUILS.rc.min} />
+              <YieldCard keyName="RI" label="Rendement Incorporation" value={d.ri} minSeuil={SEUILS.ri.min} />
             </div>
 
-            {/* CAP */}
             <SectionHead icon="◉" label="Capacité de Production (CAP)" />
             <div className="grid grid-cols-[1fr_220px] gap-3 mb-5">
               <div className="rounded-lg bg-slate-900 border border-white/5 p-4">
@@ -374,13 +476,10 @@ export default function JFC1Dashboard() {
                 <ResponsiveContainer width="100%" height={160}>
                   <LineChart data={capHistory} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                     <CartesianGrid stroke="rgba(255,255,255,.04)" vertical={false} />
-                    <XAxis dataKey="time"
-                      tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
+                    <XAxis dataKey="time" tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
                       axisLine={false} tickLine={false} />
-                    <YAxis domain={["auto", "auto"]}
-                      tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
-                      axisLine={false} tickLine={false}
-                      tickFormatter={(v) => v.toFixed(2)} />
+                    <YAxis domain={["auto", "auto"]} tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
+                      axisLine={false} tickLine={false} tickFormatter={(v) => v.toFixed(2)} />
                     <Tooltip content={<CustomTooltip />} />
                     <ReferenceLine y={1.0} stroke="rgba(255,255,255,.12)" strokeDasharray="4 3" />
                     <Line type="monotone" dataKey="cap" stroke="#00e87a" strokeWidth={2.5}
@@ -390,15 +489,9 @@ export default function JFC1Dashboard() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-
-              {/* CAP KPI */}
               <div className="rounded-lg bg-slate-900 border border-white/5 border-t-2 border-t-emerald-400 p-4 flex flex-col justify-center">
-                <p className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500 mb-2">
-                  CAP Actuel
-                </p>
-                <p className="text-5xl font-bold text-slate-100 tracking-tight font-mono leading-none">
-                  {fmt(d.cap, 4)}
-                </p>
+                <p className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500 mb-2">CAP Actuel</p>
+                <p className="text-5xl font-bold text-slate-100 tracking-tight font-mono leading-none">{fmt(d.cap, 4)}</p>
                 <p className="text-xs font-bold text-slate-400 mt-2">q54 / q29</p>
                 <p className="text-[10px] text-slate-500 mt-3 leading-relaxed">
                   Dernière mise à jour :<br />
@@ -407,17 +500,12 @@ export default function JFC1Dashboard() {
               </div>
             </div>
 
-            {/* Consommations */}
             <SectionHead icon="▣" label="Consommations Spécifiques" />
             <div className="grid grid-cols-4 gap-3">
-              <ConsumptionCard label="H₂SO₄"     value={d.consoH2so4}
-                unit="T/T P₂O₅"    seuil={SEUILS.consoH2so4.max} />
-              <ConsumptionCard label="Eau Brute"  value={d.consoEauBrute}
-                unit="m³/T P₂O₅"   seuil={SEUILS.consoEauBrute.max} />
-              <ConsumptionCard label="Phosphates" value={d.consoPhosphates}
-                unit="T/T P₂O₅"    seuil={SEUILS.consoPhosphates.max} />
-              <ConsumptionCard label="Vapeur"     value={d.consoVapeur}
-                unit="T/T P₂O₅"    seuil={SEUILS.consoVapeur.max} />
+              <ConsumptionCard label="H₂SO₄"     value={d.consoH2so4}      unit="T/T P₂O₅"   seuil={SEUILS.consoH2so4.max} />
+              <ConsumptionCard label="Eau Brute"  value={d.consoEauBrute}   unit="m³/T P₂O₅"  seuil={SEUILS.consoEauBrute.max} />
+              <ConsumptionCard label="Phosphates" value={d.consoPhosphates} unit="T/T P₂O₅"   seuil={SEUILS.consoPhosphates.max} />
+              <ConsumptionCard label="Vapeur"     value={d.consoVapeur}     unit="T/T P₂O₅"   seuil={SEUILS.consoVapeur.max} />
             </div>
           </>}
         </main>
