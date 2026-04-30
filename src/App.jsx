@@ -1,5 +1,5 @@
 import './App.css'
-import JFC1Dashboard from './components/JFC1Dashboard'
+import JFC1Dashboard from './components/dashboard/JFC1Dashboard'
 
 function App() {
 
