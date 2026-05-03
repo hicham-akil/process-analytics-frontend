@@ -92,7 +92,7 @@ export default function useGypseData() {
       onConnect: () => {
         setConnected(true);
 
-        client.subscribe("/topic/gypse", (message) => {
+        client.subscribe("/topic/input/gypse", (message) => {
           try {
             const data = JSON.parse(message.body);
             applyData(data);

@@ -1,6 +1,5 @@
-// ─── Config ──────────────────────────────────────────────────────────────────
 export const API_BASE = "http://localhost:8080/api";
-export const WS_URL   = "http://localhost:8080/api/ws-jfc1";
+export const WS_URL   = "http://localhost:8080/api/ws-jfc1";  // ✅ déjà correct
 
 export const SEUILS = {
   se:              { max: 1.5 },
@@ -17,4 +16,5 @@ export const SEUILS = {
   p2o5Phosphate:   { min: 28 },
 };
 
-export const fmt = (v) => v != null ? v : "—";
+export const fmt = (v, decimals = 4) =>
+  v != null ? Number(v).toFixed(decimals) : "—";
