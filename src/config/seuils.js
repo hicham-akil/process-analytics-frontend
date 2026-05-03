@@ -17,13 +17,4 @@ export const SEUILS = {
   p2o5Phosphate:   { min: 28 },
 };
 
-export const fmt = (v, d = 4) => v != null ? Number(v).toFixed(d) : "—";
-
-export const navItems = [
-  { icon: "◉", label: "Real-time Monitor", active: true },
-  { icon: "⬡", label: "Gypse Analysis" },
-  { icon: "◈", label: "Yield Metrics" },
-  { icon: "▣", label: "Chem Inventory" },
-  { icon: "⊕", label: "Phosphate Analysis" },
-  { icon: "≡", label: "Historique" },
-];
+export const fmt = (v) => v != null ? v : "—";

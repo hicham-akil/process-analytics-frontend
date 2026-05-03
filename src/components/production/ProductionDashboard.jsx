@@ -1,22 +1,22 @@
-import usePhosphateData from "../../hooks/usePhosphateData";
-import PhosphateTopbar from "./PhosphateTopbar";
-import PhosphateKPICards from "./PhosphateKPICards";
-import PhosphateChart from "./PhosphateChart";
+import useProductionData from "../../hooks/useProductionData";
+import ProductionTopbar from "./ProductionTopbar";
+import ProductionKPICards from "./ProductionKPICards";
+import ProductionChart from "./ProductionChart";
 import { fmt } from "../../config/seuils";
 
-export default function PhosphateDashboard() {
-  const { latest, history, connected, pulse, lastUpdate, stats } = usePhosphateData();
+export default function ProductionDashboard() {
+  const { latest, history, connected, pulse, lastUpdate, stats } = useProductionData();
 
   return (
     <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
-      <PhosphateTopbar connected={connected} pulse={pulse} lastUpdate={lastUpdate} />
+      <ProductionTopbar connected={connected} pulse={pulse} lastUpdate={lastUpdate} />
 
       <main className="flex-1 overflow-y-auto p-6 bg-[#060d1a]">
         {!latest && (
           <div className="flex items-center justify-center h-64 text-slate-600 text-sm">
             <div className="text-center">
-              <div className="text-4xl mb-4 opacity-30 text-sky-400">⊕</div>
-              <p>En attente des données Phosphate...</p>
+              <div className="text-4xl mb-4 opacity-30 text-emerald-400">⊞</div>
+              <p>En attente des données Production...</p>
               <p className="text-[10px] text-slate-700 mt-2">
                 WebSocket: {connected ? "connecté, en attente du flux" : "connexion en cours..."}
               </p>
@@ -30,11 +30,11 @@ export default function PhosphateDashboard() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                  ⊕ Indicateurs Qualité Phosphate
+                  ⊞ Débits de Production Actuels
                 </span>
                 <div className="flex-1 h-px bg-white/5" />
               </div>
-              <PhosphateKPICards data={latest} />
+              <ProductionKPICards data={latest} />
             </div>
 
             {/* Chart and Stats Section */}
@@ -42,11 +42,11 @@ export default function PhosphateDashboard() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                    ◉ Évolution Temps Réel
+                    ◉ Évolution des Débits (T/h)
                   </span>
                   <div className="flex-1 h-px bg-white/5" />
                 </div>
-                <PhosphateChart history={history} />
+                <ProductionChart history={history} />
               </div>
 
               <div>
@@ -57,9 +57,9 @@ export default function PhosphateDashboard() {
                   <div className="flex-1 h-px bg-white/5" />
                 </div>
                 <div className="bg-slate-900 border border-white/5 rounded-xl p-5 space-y-6">
-                  <StatGroup label="P₂O₅ (%)" stats={stats.p2o5Phosphate} />
+                  <StatGroup label="P₂O₅ 29% (T/h)" stats={stats.qP2o529} />
                   <div className="h-px bg-white/5" />
-                  <StatGroup label="CaO (%)" stats={stats.caoPhosphate} />
+                  <StatGroup label="P₂O₅ 54% (T/h)" stats={stats.qP2o554} />
                 </div>
               </div>
             </div>

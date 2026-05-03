@@ -10,7 +10,7 @@ function ConsumptionCard({ label, value, unit, seuil }) {
       <div className={`text-lg mb-2 ${isAmber ? "text-amber-400" : "text-emerald-400"}`}>◎</div>
       <p className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500 mb-1.5">{label}</p>
       <p className={`text-2xl font-bold font-mono ${isAmber ? "text-amber-400" : "text-slate-100"}`}>
-        {fmt(value, 2)}
+        {fmt(value)}
       </p>
       <p className="text-[9px] text-slate-500 font-bold mt-0.5">{unit}</p>
     </div>

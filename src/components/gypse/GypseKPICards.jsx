@@ -43,7 +43,7 @@ function GypseKPICard({ config, valueA, valueB }) {
             <span className="text-[10px] text-slate-500 block mb-1">Ligne A</span>
             <div className="flex items-baseline gap-1">
               <span className={`text-3xl font-black tracking-tight font-mono ${isAmberA ? "text-amber-400" : "text-slate-100"}`}>
-                {fmt(valueA, 2)}
+                {fmt(valueA)}
               </span>
               <span className="text-slate-500 font-bold text-xs">{config.unit}</span>
             </div>
@@ -52,7 +52,7 @@ function GypseKPICard({ config, valueA, valueB }) {
             <span className="text-[10px] text-slate-500 block mb-1">Ligne B</span>
             <div className="flex items-baseline gap-1">
               <span className={`text-3xl font-black tracking-tight font-mono ${isAmberB ? "text-amber-400" : "text-slate-100"}`}>
-                {fmt(valueB, 2)}
+                {fmt(valueB)}
               </span>
               <span className="text-slate-500 font-bold text-xs">{config.unit}</span>
             </div>

@@ -1,10 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { navItems } from "../../config/seuils";
 
 const DASHBOARDS = [
   { icon: "◉", label: "JFC1 Monitor",   path: "/" },
   { icon: "⬡", label: "Gypse Analysis", path: "/gypse" },
   { icon: "⊕", label: "Phosphate Analysis", path: "/phosphate" },
+  { icon: "⊞", label: "Production Analysis", path: "/production" },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
@@ -33,20 +33,6 @@ export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
       })}
 
       <div className="h-px bg-white/5 mx-4 my-3" />
-
-      {/* Nav items */}
-      <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 px-4 mb-3">Navigation</p>
-      {navItems.map((item) => (
-        <button key={item.label}
-          className={`flex items-center gap-2.5 px-4 py-2.5 text-[10px] font-bold tracking-[.06em] uppercase border-l-2 transition-all text-left ${
-            item.active
-              ? "text-emerald-400 border-l-emerald-400 bg-emerald-500/10"
-              : "text-slate-500 border-l-transparent hover:text-slate-300"
-          }`}>
-          <span className="text-sm w-4 text-center">{item.icon}</span>
-          {item.label}
-        </button>
-      ))}
 
       {/* Alertes sidebar */}
       <div className="mt-6 px-4">

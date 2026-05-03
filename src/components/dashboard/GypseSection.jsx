@@ -16,7 +16,7 @@ function GypseCard({ label, value, seuil }) {
       </div>
       <div className="flex items-baseline gap-1">
         <span className={`text-4xl font-bold tracking-tight font-mono ${isAmber ? "text-amber-400" : "text-slate-100"}`}>
-          {fmt(value, 2)}
+          {fmt(value)}
         </span>
         <span className="text-slate-500 font-bold text-sm">%</span>
       </div>

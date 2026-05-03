@@ -12,7 +12,7 @@ function RingMeter({ value, size = 96 }) {
           strokeDasharray={`${pct} 100`} strokeLinecap="round" />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center font-bold text-emerald-400 text-xl font-mono">
-        {value != null ? `${(value * 100).toFixed(1)}%` : "—"}
+        {value != null ? `${(value * 100)}%` : "—"}
       </div>
     </div>
   );
@@ -35,7 +35,7 @@ function YieldCard({ label, keyName, value, minSeuil }) {
           }`}>
             {isAmber ? "Sous seuil" : "Optimal"}
           </span>
-          <span className="text-[9px] text-slate-500">Seuil min: {(minSeuil * 100).toFixed(0)}%</span>
+          <span className="text-[9px] text-slate-500">Seuil min: {(minSeuil * 100)}%</span>
         </div>
       </div>
       <RingMeter value={value} />

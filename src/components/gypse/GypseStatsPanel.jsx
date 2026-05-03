@@ -1,4 +1,4 @@
-import { SEUILS } from "../../config/seuils";
+import { SEUILS, fmt } from "../../config/seuils";
 
 const METRIC_CONFIG = [
   { keyA: "seA",  keyB: "seB",  label: "SE",  color: "cyan",   seuil: SEUILS.se.max },
@@ -19,10 +19,10 @@ function StatRow({ label, valueA, valueB, color }) {
       <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{label}</span>
       <div className="flex gap-4">
         <span className={`text-[10px] font-bold font-mono ${valueA != null ? c.text : "text-slate-600"}`}>
-          A: {valueA != null ? valueA.toFixed(4) : "—"}
+          A: {fmt(valueA)}
         </span>
         <span className={`text-[10px] font-bold font-mono ${valueB != null ? c.text : "text-slate-600"}`}>
-          B: {valueB != null ? valueB.toFixed(4) : "—"}
+          B: {fmt(valueB)}
         </span>
       </div>
     </div>

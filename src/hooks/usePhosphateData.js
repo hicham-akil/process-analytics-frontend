@@ -20,15 +20,18 @@ export default function usePhosphateData() {
   }, []);
 
   // ✅ normalize data
-  const formatPoint = (data) => ({
-    time: data.date
-      ? new Date(data.date).toLocaleTimeString()
-      : new Date().toLocaleTimeString(),
-    date: data.date,
-    p2o5Phosphate: data.p2o5Phosphate,
-    caoPhosphate: data.caoPhosphate,
-    qPhosphate: data.qPhosphate,
-  });
+  const formatPoint = (data) => {
+    const phos = data.analysePhosphate || data;
+    return {
+      time: phos.date
+        ? new Date(phos.date).toLocaleTimeString()
+        : new Date().toLocaleTimeString(),
+      date: phos.date,
+      p2o5Phosphate: phos.p2o5Phosphate,
+      caoPhosphate: phos.caoPhosphate,
+      qPhosphate: phos.qPhosphate,
+    };
+  };
 
   const applyData = useCallback((data) => {
     if (!data) return;

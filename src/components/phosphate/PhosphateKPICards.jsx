@@ -13,7 +13,7 @@ function PhosphateKPICard({ label, value, unit, seuil, suffix = "" }) {
       </div>
       <div className="flex items-baseline gap-1">
         <span className={`text-4xl font-bold tracking-tight font-mono ${colorClass}`}>
-          {fmt(value, 2)}
+          {fmt(value)}
         </span>
         <span className="text-slate-500 font-bold text-sm">{unit}</span>
       </div>
