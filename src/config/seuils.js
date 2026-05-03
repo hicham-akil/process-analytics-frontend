@@ -12,6 +12,9 @@ export const SEUILS = {
   consoEauBrute:   { max: 15 },
   consoPhosphates: { max: 3.5 },
   consoVapeur:     { max: 1.2 },
+  p2o5Gypse:       { max: 2.5 },
+  caOGypse:        { min: 20, max: 30 },
+  p2o5Phosphate:   { min: 28 },
 };
 
 export const fmt = (v, d = 4) => v != null ? Number(v).toFixed(d) : "—";
@@ -21,5 +24,6 @@ export const navItems = [
   { icon: "⬡", label: "Gypse Analysis" },
   { icon: "◈", label: "Yield Metrics" },
   { icon: "▣", label: "Chem Inventory" },
+  { icon: "⊕", label: "Phosphate Analysis" },
   { icon: "≡", label: "Historique" },
 ];

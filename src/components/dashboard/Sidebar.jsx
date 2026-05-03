@@ -4,6 +4,7 @@ import { navItems } from "../../config/seuils";
 const DASHBOARDS = [
   { icon: "◉", label: "JFC1 Monitor",   path: "/" },
   { icon: "⬡", label: "Gypse Analysis", path: "/gypse" },
+  { icon: "⊕", label: "Phosphate Analysis", path: "/phosphate" },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
