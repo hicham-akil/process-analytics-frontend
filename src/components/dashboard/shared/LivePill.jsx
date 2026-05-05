@@ -5,7 +5,7 @@ export default function LivePill({ connected, pulse }) {
         connected ? "bg-emerald-400" : "bg-red-400"
       } ${pulse ? "opacity-100" : "opacity-20"}`} />
       <span className="text-[9px] font-bold tracking-widest text-emerald-400">
-        {connected ? "LIVE" : "OFF"}
+        {connected ? "DIRECT" : "HORS LIGNE"}
       </span>
     </span>
   );

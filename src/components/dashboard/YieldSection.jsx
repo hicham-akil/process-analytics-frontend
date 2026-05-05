@@ -48,8 +48,8 @@ export default function YieldSection({ data }) {
     <>
       <SectionHead icon="◈" label="Rendements" />
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <YieldCard keyName="RC" label="Rendement Concentration" value={data.rc} minSeuil={SEUILS.rc.min} />
-        <YieldCard keyName="RI" label="Rendement Incorporation" value={data.ri} minSeuil={SEUILS.ri.min} />
+        <YieldCard keyName="RC" label="Rendement Chimique" value={data.rc} minSeuil={SEUILS.rc.min} />
+        <YieldCard keyName="RI" label="Rendement Industrielle" value={data.ri} minSeuil={SEUILS.ri.min} />
       </div>
     </>
   );

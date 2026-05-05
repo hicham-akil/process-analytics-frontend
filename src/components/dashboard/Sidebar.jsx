@@ -1,10 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
 
 const DASHBOARDS = [
-  { icon: "◉", label: "JFC1 Monitor",   path: "/" },
-  { icon: "⬡", label: "Gypse Analysis", path: "/gypse" },
-  { icon: "⊕", label: "Phosphate Analysis", path: "/phosphate" },
-  { icon: "⊞", label: "Production Analysis", path: "/production" },
+  { icon: "◉", label: "Moniteur JFC1",      path: "/" },
+  { icon: "⬡", label: "Analyse Gypse",      path: "/gypse" },
+  { icon: "⊕", label: "Analyse Phosphate",  path: "/phosphate" },
+  { icon: "⊞", label: "Analyse Production", path: "/production" },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
@@ -15,7 +15,7 @@ export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
     <nav className="w-52 flex-shrink-0 bg-[#060d1a] border-r border-white/5 flex flex-col py-4 overflow-y-auto">
 
       {/* Dashboard switcher */}
-      <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 px-4 mb-3">Dashboards</p>
+      <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 px-4 mb-3">Tableaux de bord</p>
       {DASHBOARDS.map((d) => {
         const isActive = location.pathname === d.path;
         return (
@@ -56,7 +56,7 @@ export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
           <div className="flex items-center justify-between">
             <span className="text-[9px] font-bold text-slate-500 uppercase">Backend</span>
             <span className={`text-[9px] font-bold ${connected ? "text-emerald-400" : "text-red-400"}`}>
-              {connected ? "ONLINE" : "OFFLINE"}
+              {connected ? "EN LIGNE" : "HORS LIGNE"}
             </span>
           </div>
           <div className="flex items-center justify-between">

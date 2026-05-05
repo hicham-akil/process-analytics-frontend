@@ -28,21 +28,21 @@ export default function PhosphateKPICards({ data }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <PhosphateKPICard
-        label="P₂O₅ Phosphate"
+        label="P₂O₅ Phosphate Indicateur de concentration"
         value={data.p2o5Phosphate}
         unit="%"
         seuil={SEUILS.p2o5Phosphate}
         suffix="Indicateur de concentration"
       />
       <PhosphateKPICard
-        label="CaO Phosphate"
+        label="Cao Phosphate Teneur en chaux"
         value={data.caoPhosphate}
         unit="%"
         seuil={null}
         suffix="Teneur en chaux"
       />
       <PhosphateKPICard
-        label="Quantité Phosphate"
+        label="Quantité Phosphate Masse totale injectée"
         value={data.qPhosphate}
         unit="T"
         seuil={null}
