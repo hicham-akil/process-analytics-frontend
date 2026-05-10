@@ -5,6 +5,7 @@ const DASHBOARDS = [
   { icon: "⬡", label: "Analyse Gypse",      path: "/gypse" },
   { icon: "⊕", label: "Analyse Phosphate",  path: "/phosphate" },
   { icon: "⊞", label: "Analyse Production", path: "/production" },
+  { icon: "◷", label: "Historique JFC1",    path: "/historique" },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {

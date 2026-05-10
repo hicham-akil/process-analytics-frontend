@@ -8,7 +8,7 @@ export default function Topbar({ connected, pulse, lastUpdate, alertesCount, onT
       <div className="flex items-center gap-3">
         <div className="w-7 h-7 bg-emerald-400 rounded flex items-center justify-center font-black text-[#060d1a] text-sm">O</div>
         <span className="text-[13px] font-black text-emerald-400 tracking-[.15em] uppercase">
-          JFC1 — Acide Phosphorique
+          JFC3 — Acide Phosphorique
         </span>
       </div>
       <div className="flex items-center gap-4">

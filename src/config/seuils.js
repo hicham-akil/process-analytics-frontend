@@ -1,26 +1,23 @@
-// constants.js — seuils WARNING + CRITIQUE complets extraits des alertes backend
-
+  
 export const API_BASE = "http://localhost:8080/api";
 export const WS_URL   = "http://localhost:8080/api/ws-jfc1";
 
-// Seuils à deux niveaux pour tous les indicateurs
-// Pour MAX : warning < critique (valeur monte)
-// Pour MIN : warning > critique (valeur descend)
+
 export const SEUILS_NIVEAUX = {
-  se:              { type: "max", warning: 1.5,  critique: 1.8  },
-  syn:             { type: "max", warning: 1.8,  critique: 2.2  },
-  intVal:          { type: "max", warning: 1.2,  critique: 1.5  },
-  rc:              { type: "min", warning: 0.90, critique: 0.84 },
-  ri:              { type: "min", warning: null, critique: 0.8  },
-  consoH2so4:      { type: "max", warning: null, critique: 3.8  },
-  consoEauBrute:   { type: "max", warning: null, critique: 15.0 },
-  consoPhosphates: { type: "max", warning: 3.5,  critique: 4.2  },
-  consoVapeur:     { type: "max", warning: 1.2,  critique: 1.5  },
-  cap:             { type: "max", warning: null, critique: 2.0  },
-  p2o5Gypse:       { type: "max", warning: null, critique: 3.5  },
-  caOGypse:        { type: "max", warning: null, critique: 33.0 },
-  p2o5Phosphate:   { type: "min", warning: null, critique: 27.0 },
-  caOPhosphate:    { type: "min", warning: null, critique: 39.0 },
+  se:              { type: "max", warning: 0.60,  critique: 0.90  },
+  syn:             { type: "max", warning: 0.78,  critique: 0.86  },
+  intVal:          { type: "max", warning: 0.21,  critique: 0.23  },
+  rc:              { type: "min", warning: 0.93,  critique: 0.90  },
+  ri:              { type: "min", warning: null,  critique: 0.80  },
+  consoH2so4:      { type: "max", warning: null,  critique: 3.8   },
+  consoEauBrute:   { type: "max", warning: null,  critique: 15.0  },
+  consoPhosphates: { type: "max", warning: 3.5,   critique: 4.2   },
+  consoVapeur:     { type: "max", warning: 1.2,   critique: 1.5   },
+  cap:             { type: "max", warning: null,  critique: 2.0   },
+  p2o5Gypse:       { type: "max", warning: null,  critique: 3.5   },
+  caOGypse:        { type: "max", warning: null,  critique: 33.0  },
+  p2o5Phosphate:   { type: "min", warning: null,  critique: 27.0  },
+  caOPhosphate:    { type: "min", warning: null,  critique: 39.0  },
 };
 
 // Seuils simples (pour compatibilité / affichage rapide)
