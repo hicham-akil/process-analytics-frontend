@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const DASHBOARDS = [
   { icon: "◉", label: "Moniteur JFC1",      path: "/" },
+  { icon: "✍", label: "Saisie Pertes",      path: "/perte" },
   { icon: "⬡", label: "Analyse Gypse",      path: "/gypse" },
   { icon: "⊕", label: "Analyse Phosphate",  path: "/phosphate" },
   { icon: "⊞", label: "Analyse Production", path: "/production" },

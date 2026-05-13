@@ -1,9 +1,9 @@
 import { SEUILS } from "../../config/seuils";
 
 const GAUGE_CONFIG = [
-  { keyA: "seA",  keyB: "seB",  label: "SE",  seuil: SEUILS.se.max,     color: "#22d3ee", track: "rgba(34,211,238,.1)" },
-  { keyA: "synA", keyB: "synB", label: "SYN", seuil: SEUILS.syn.max,    color: "#a78bfa", track: "rgba(167,139,250,.1)" },
-  { keyA: "intA", keyB: "intB", label: "INT", seuil: SEUILS.intVal.max, color: "#fbbf24", track: "rgba(251,191,36,.1)" },
+  { key: "se",     label: "SE",  seuil: SEUILS.se.max,     color: "#22d3ee", track: "rgba(34,211,238,.1)" },
+  { key: "syn",    label: "SYN", seuil: SEUILS.syn.max,    color: "#a78bfa", track: "rgba(167,139,250,.1)" },
+  { key: "intVal", label: "INT", seuil: SEUILS.intVal.max, color: "#fbbf24", track: "rgba(251,191,36,.1)" },
 ];
 
 function SingleGauge({ value, seuil, color, track, subLabel }) {
@@ -16,7 +16,7 @@ function SingleGauge({ value, seuil, color, track, subLabel }) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative" style={{ width: 80, height: 50 }}>
+      <div className="relative" style={{ width: 100, height: 60 }}>
         <svg viewBox="0 0 100 50" className="w-full h-full">
           <path d={`M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}`}
             fill="none" stroke={track} strokeWidth="6" strokeLinecap="round" />
@@ -46,15 +46,14 @@ export default function GypseGauges({ data }) {
       <div className="flex flex-col gap-6">
         {GAUGE_CONFIG.map(g => (
           <div key={g.label} className="flex items-center justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
-            <div className="w-12 text-center">
+            <div className="w-16">
               <span className="text-[10px] font-bold tracking-[.15em] uppercase" style={{ color: g.color }}>
                 {g.label}
               </span>
-              <div className="text-[8px] text-slate-600 font-mono mt-1">seuil: {g.seuil}</div>
+              <div className="text-[8px] text-slate-600 font-mono mt-1 whitespace-nowrap">seuil: {g.seuil}</div>
             </div>
-            <div className="flex gap-4">
-              <SingleGauge value={data[g.keyA]} seuil={g.seuil} color={g.color} track={g.track} subLabel="Ligne A" />
-              <SingleGauge value={data[g.keyB]} seuil={g.seuil} color={g.color} track={g.track} subLabel="Ligne B" />
+            <div className="flex-1 flex justify-center">
+              <SingleGauge value={data[g.key]} seuil={g.seuil} color={g.color} track={g.track} subLabel="Moyenne JFC1" />
             </div>
           </div>
         ))}

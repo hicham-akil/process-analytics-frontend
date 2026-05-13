@@ -1,15 +1,13 @@
 import { SEUILS, fmt } from "../../config/seuils";
 
 const GYPSE_CONFIG = [
-  { keyA: "seA",  keyB: "seB",  label: "SE",  fullLabel: "Perte Séchage & Évaporation", seuil: SEUILS.se.max,     unit: "%" },
-  { keyA: "synA", keyB: "synB", label: "SYN", fullLabel: "Perte Synthèse",              seuil: SEUILS.syn.max,    unit: "%" },
-  { keyA: "intA", keyB: "intB", label: "INT", fullLabel: "Perte Intermédiaire",         seuil: SEUILS.intVal.max, unit: "%" },
+  { key: "se",     label: "SE",  fullLabel: "Perte Séchage & Évaporation", seuil: SEUILS.se.max,     unit: "%" },
+  { key: "syn",    label: "SYN", fullLabel: "Perte Synthèse",              seuil: SEUILS.syn.max,    unit: "%" },
+  { key: "intVal", label: "INT", fullLabel: "Perte Intermédiaire",         seuil: SEUILS.intVal.max, unit: "%" },
 ];
 
-function GypseKPICard({ config, valueA, valueB }) {
-  const isAmberA = valueA != null && valueA > config.seuil;
-  const isAmberB = valueB != null && valueB > config.seuil;
-  const isAmber = isAmberA || isAmberB;
+function GypseKPICard({ config, value }) {
+  const isAmber = value != null && value > config.seuil;
 
   return (
     <div className={`relative overflow-hidden rounded-xl bg-slate-900/80 border border-white/5 p-5 backdrop-blur-sm transition-all duration-500 hover:border-white/10 ${
@@ -38,24 +36,12 @@ function GypseKPICard({ config, valueA, valueB }) {
           </div>
         </div>
 
-        <div className="flex gap-4 mb-3">
-          <div className="flex-1 bg-slate-950/50 p-3 rounded-lg border border-white/5">
-            <span className="text-[10px] text-slate-500 block mb-1">Ligne A</span>
-            <div className="flex items-baseline gap-1">
-              <span className={`text-3xl font-black tracking-tight font-mono ${isAmberA ? "text-amber-400" : "text-slate-100"}`}>
-                {fmt(valueA)}
-              </span>
-              <span className="text-slate-500 font-bold text-xs">{config.unit}</span>
-            </div>
-          </div>
-          <div className="flex-1 bg-slate-950/50 p-3 rounded-lg border border-white/5">
-            <span className="text-[10px] text-slate-500 block mb-1">Ligne B</span>
-            <div className="flex items-baseline gap-1">
-              <span className={`text-3xl font-black tracking-tight font-mono ${isAmberB ? "text-amber-400" : "text-slate-100"}`}>
-                {fmt(valueB)}
-              </span>
-              <span className="text-slate-500 font-bold text-xs">{config.unit}</span>
-            </div>
+        <div className="bg-slate-950/50 p-4 rounded-lg border border-white/5 mb-3">
+          <div className="flex items-baseline justify-center gap-2">
+            <span className={`text-4xl font-black tracking-tight font-mono ${isAmber ? "text-amber-400" : "text-slate-100"}`}>
+              {fmt(value)}
+            </span>
+            <span className="text-slate-500 font-bold text-sm">{config.unit}</span>
           </div>
         </div>
 
@@ -77,8 +63,7 @@ export default function GypseKPICards({ data }) {
         <GypseKPICard
           key={config.label}
           config={config}
-          valueA={data[config.keyA]}
-          valueB={data[config.keyB]}
+          value={data[config.key]}
         />
       ))}
     </div>

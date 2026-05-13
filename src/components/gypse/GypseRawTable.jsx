@@ -4,9 +4,6 @@ export default function GypseRawTable({ data }) {
   if (!data) return null;
 
   const rows = [
-    { label: "Séchage & Évaporation (SE)", keyA: "seA", keyB: "seB", unit: "%" },
-    { label: "Synthèse (SYN)", keyA: "synA", keyB: "synB", unit: "%" },
-    { label: "Intermédiaire (INT)", keyA: "intA", keyB: "intB", unit: "%" },
     { label: "P₂O₅ Gypse", keyA: "p2o5GypseA", keyB: "p2o5GypseB", unit: "%" },
     { label: "CaO Gypse", keyA: "caOGypseA", keyB: "caOGypseB", unit: "%" },
   ];

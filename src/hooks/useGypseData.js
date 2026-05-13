@@ -25,12 +25,6 @@ export default function useGypseData() {
       ? new Date(data.date).toLocaleTimeString()
       : new Date().toLocaleTimeString(),
     date: data.date,
-    seA: data.seA,
-    seB: data.seB,
-    synA: data.synA,
-    synB: data.synB,
-    intA: data.intA,
-    intB: data.intB,
     p2o5GypseA: data.p2o5GypseA,
     p2o5GypseB: data.p2o5GypseB,
     caOGypseA: data.caOGypseA,
@@ -123,12 +117,10 @@ export default function useGypseData() {
 
   // ✅ stats
   const stats = {
-    seA: computeStats(history, "seA"),
-    seB: computeStats(history, "seB"),
-    synA: computeStats(history, "synA"),
-    synB: computeStats(history, "synB"),
-    intA: computeStats(history, "intA"),
-    intB: computeStats(history, "intB"),
+    p2o5GypseA: computeStats(history, "p2o5GypseA"),
+    p2o5GypseB: computeStats(history, "p2o5GypseB"),
+    caOGypseA: computeStats(history, "caOGypseA"),
+    caOGypseB: computeStats(history, "caOGypseB"),
   };
 
   return { latest, history, connected, pulse, lastUpdate, stats };

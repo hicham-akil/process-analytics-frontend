@@ -3,7 +3,9 @@ import { SEUILS } from "../../config/seuils";
 
 function RingMeter({ value, size = 96 }) {
   const r = 15.9;
-  const pct = value != null ? Math.min(value * 100, 100) : 0;
+
+  const pct = value != null ? Math.min((value / 4) * 100, 100) : 0;
+
   return (
     <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
       <svg viewBox="0 0 36 36" className="w-full h-full" style={{ transform: "rotate(-90deg)" }}>
@@ -11,8 +13,9 @@ function RingMeter({ value, size = 96 }) {
         <circle cx="18" cy="18" r={r} fill="none" stroke="#00e87a" strokeWidth="3.5"
           strokeDasharray={`${pct} 100`} strokeLinecap="round" />
       </svg>
+
       <div className="absolute inset-0 flex items-center justify-center font-bold text-emerald-400 text-xl font-mono">
-        {value != null ? `${(value * 100)}%` : "—"}
+        {value != null ? value.toFixed(2) : "—"}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import GypseDashboard from './components/gypse/GypseDashboard'
 import PhosphateDashboard from './components/phosphate/PhosphateDashboard'
 import ProductionDashboard from './components/production/ProductionDashboard'
 import HistoriqueDashboard from './components/historique/HistoriqueDashboard'
+import PerteDashboard from './components/perte/PerteDashboard'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/phosphate" element={<PhosphateDashboard />} />
         <Route path="/production" element={<ProductionDashboard />} />
         <Route path="/historique" element={<HistoriqueDashboard />} />
+        <Route path="/perte" element={<PerteDashboard />} />
       </Routes>
     </BrowserRouter>
   )
