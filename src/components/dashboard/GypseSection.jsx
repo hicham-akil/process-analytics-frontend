@@ -9,7 +9,7 @@ function GypseCard({ label, value, seuil }) {
       isAmber ? "border-t-2 border-t-amber-400" : "border-t-2 border-t-emerald-400"
     }`}>
       <div className="flex justify-between items-start mb-2">
-        <span className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500">Loss {label}</span>
+        <span className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500">Pertes {label}</span>
         <span className={`text-lg font-bold ${isAmber ? "text-amber-400" : "text-emerald-400"}`}>
           {isAmber ? "↑" : "↓"}
         </span>

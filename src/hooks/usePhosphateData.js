@@ -10,131 +10,92 @@ export default function usePhosphateData() {
   const [connected, setConnected] = useState(false);
   const [pulse, setPulse] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
-
   const clientRef = useRef(null);
 
-  // ✅ pulse animation
   useEffect(() => {
     const id = setInterval(() => setPulse(v => !v), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // ✅ normalize data
   const formatPoint = (data) => {
-    const phos = data.analysePhosphate || data;
+    // Supporte les deux formats : { p2o5Phosphate, ... } ou { analysePhosphate: {...} }
+    const phos = data?.analysePhosphate || data;
     return {
       time: phos.date
-        ? new Date(phos.date).toLocaleTimeString()
-        : new Date().toLocaleTimeString(),
+        ? new Date(phos.date).toLocaleTimeString("fr-MA")
+        : new Date().toLocaleTimeString("fr-MA"),
       date: phos.date,
       p2o5Phosphate: phos.p2o5Phosphate,
-      caoPhosphate: phos.caoPhosphate,
-      qPhosphate: phos.qPhosphate,
+      caoPhosphate:  phos.caoPhosphate ?? phos.caOPhosphate,
+      qPhosphate:    phos.qPhosphate,
     };
   };
 
   const applyData = useCallback((data) => {
     if (!data) return;
-
     const point = formatPoint(data);
-
     setLatest(point);
     setLastUpdate(new Date());
-
     setPulse(true);
     setTimeout(() => setPulse(false), 500);
-
-    setHistory(prev => [...prev.slice(-49), point]); // keep last 50
+    setHistory(prev => [...prev.slice(-49), point]);
   }, []);
 
-  // ✅ LOAD historique + fallback dernier
+  // Chargement initial
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const load = async () => {
       try {
-        // 1️⃣ historique
         const histRes = await axios.get(`${API_BASE}/ingest/phosphate/historique`).catch(() => null);
-
-        if (histRes && histRes.data && histRes.data.length > 0) {
+        if (histRes?.data?.length > 0) {
           const formatted = histRes.data.map(formatPoint);
           setHistory(formatted);
-          const last = formatted[formatted.length - 1];
-          setLatest(last);
+          setLatest(formatted[formatted.length - 1]);
           setLastUpdate(new Date());
         } else {
-          // 2️⃣ fallback dernier
           const lastRes = await axios.get(`${API_BASE}/ingest/phosphate/dernier`).catch(() => null);
-          if (lastRes && lastRes.data) {
-            applyData(lastRes.data);
-          }
+          if (lastRes?.data) applyData(lastRes.data);
         }
       } catch (err) {
-        console.error("Error loading initial phosphate data:", err);
+        console.error("Erreur chargement phosphate:", err);
       }
     };
-
-    fetchInitialData();
+    load();
   }, [applyData]);
 
-  // ✅ WEBSOCKET
+  // WebSocket
   useEffect(() => {
     if (clientRef.current) return;
-
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       reconnectDelay: 5000,
-
       onConnect: () => {
         setConnected(true);
-
-        client.subscribe("/topic/phosphate", (message) => {
-          try {
-            const data = JSON.parse(message.body);
-            applyData(data);
-          } catch (e) {
-            console.error("WS Phosphate parse error:", e);
-          }
+        // ✅ FIX: écouter /topic/input/phosphate (nouveau backend)
+        client.subscribe("/topic/input/phosphate", (msg) => {
+          try { applyData(JSON.parse(msg.body)); }
+          catch (e) { console.error("WS phosphate parse error:", e); }
         });
       },
-
       onDisconnect: () => setConnected(false),
-
-      onStompError: (frame) => {
-        console.error("STOMP Phosphate error:", frame);
-        setConnected(false);
-      },
+      onStompError:  () => setConnected(false),
     });
-
     client.activate();
     clientRef.current = client;
-
-    return () => {
-      if (clientRef.current) {
-        clientRef.current.deactivate();
-        clientRef.current = null;
-      }
-    };
+    return () => { clientRef.current?.deactivate(); clientRef.current = null; };
   }, [applyData]);
 
-  // ✅ stats
   const stats = {
     p2o5Phosphate: computeStats(history, "p2o5Phosphate"),
-    caoPhosphate: computeStats(history, "caoPhosphate"),
-    qPhosphate: computeStats(history, "qPhosphate"),
+    caoPhosphate:  computeStats(history, "caoPhosphate"),
+    qPhosphate:    computeStats(history, "qPhosphate"),
   };
 
   return { latest, history, connected, pulse, lastUpdate, stats };
 }
 
-// ✅ stats helper
 function computeStats(history, key) {
-  const values = history
-    .map(h => h[key])
-    .filter(v => v != null && !isNaN(v));
-
-  if (!values.length) {
-    return { min: null, max: null, avg: null, count: 0 };
-  }
-
+  const values = history.map(h => h[key]).filter(v => v != null && !isNaN(v));
+  if (!values.length) return { min: null, max: null, avg: null, count: 0 };
   return {
     min: Math.min(...values),
     max: Math.max(...values),

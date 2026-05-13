@@ -1,4 +1,5 @@
 import useGypseData from "../../hooks/useGypseData";
+import usePerteData from "../../hooks/usePerteData";
 import GypseTopbar from "./GypseTopbar";
 import GypseKPICards from "./GypseKPICards";
 import GypseChart from "./GypseChart";
@@ -8,6 +9,7 @@ import GypseRawTable from "./GypseRawTable";
 
 export default function GypseDashboard() {
   const { latest, history, connected, pulse, lastUpdate, stats } = useGypseData();
+  const { latest: perteLatest, history: perteHistory } = usePerteData();
 
   return (
     <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
@@ -46,34 +48,34 @@ export default function GypseDashboard() {
                 </span>
                 <div className="flex-1 h-px bg-white/5" />
               </div>
-              <GypseKPICards data={latest} />
+              <GypseKPICards data={perteLatest} />
             </div>
 
             <div className="grid grid-cols-[1fr_340px] gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                    ◉ Historique Temps Réel
+                    ◉ Historique Temps Réel (Pertes)
                   </span>
                   <div className="flex-1 h-px bg-white/5" />
                 </div>
-                <GypseChart history={history} />
+                <GypseChart history={perteHistory} />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                    ◎ Jauges
+                    ◎ Jauges (Pertes)
                   </span>
                   <div className="flex-1 h-px bg-white/5" />
                 </div>
-                <GypseGauges data={latest} />
+                <GypseGauges data={perteLatest} />
               </div>
             </div>
 
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                  ◈ Statistiques de Session
+                  ◈ Statistiques de Session (Gypse)
                 </span>
                 <div className="flex-1 h-px bg-white/5" />
               </div>

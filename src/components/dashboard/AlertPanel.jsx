@@ -26,7 +26,7 @@ function AlertPanel({ alertes, onAcquitter, onClose }) {
                         ? "bg-red-500/20 text-red-400 border border-red-500/30"
                         : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                     }`}>
-                      {a.severite}
+                      {a.severite === "CRITICAL" ? "CRITIQUE" : a.severite}
                     </span>
                     <span className="text-[10px] font-bold text-slate-200">
                       {a.typeIndicateur}

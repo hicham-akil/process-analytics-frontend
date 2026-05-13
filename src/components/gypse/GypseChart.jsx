@@ -26,22 +26,22 @@ export default function GypseChart({ history }) {
       <div className="flex justify-between items-center mb-5">
         <div>
           <h3 className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500 mb-1">
-            Tendance des Pertes Gypse (Ligne A & B)
+            Tendance des Pertes Gypse
           </h3>
-          <p className="text-[10px] text-slate-600">Derniers relevés en temps réel</p>
+          <p className="text-[10px] text-slate-600">Derniers relevés (Saisie Manuelle)</p>
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-[3px] bg-cyan-400 rounded" />
-            <span className="text-[9px] text-slate-500">SE (A/B)</span>
+            <span className="text-[9px] text-slate-500">SE</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-[3px] bg-violet-400 rounded" />
-            <span className="text-[9px] text-slate-500">SYN (A/B)</span>
+            <span className="text-[9px] text-slate-500">SYN</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-[3px] bg-amber-400 rounded" />
-            <span className="text-[9px] text-slate-500">INT (A/B)</span>
+            <span className="text-[9px] text-slate-500">INT</span>
           </div>
         </div>
       </div>
@@ -68,20 +68,11 @@ export default function GypseChart({ history }) {
           <ReferenceLine y={SEUILS.syn.max}    stroke="rgba(167,139,250,.2)" strokeDasharray="4 3" label="" />
           <ReferenceLine y={SEUILS.intVal.max} stroke="rgba(251,191,36,.2)"  strokeDasharray="4 3" label="" />
 
-          {/* Ligne A - Solid */}
-          <Line type="monotone" dataKey="seA" name="SE Ligne A" stroke="#22d3ee" strokeWidth={2.5}
+          <Line type="monotone" dataKey="se" name="SE" stroke="#22d3ee" strokeWidth={2.5}
             dot={false} activeDot={{ r: 5, stroke: "#22d3ee", strokeWidth: 2, fill: "#060d1a" }} />
-          <Line type="monotone" dataKey="synA" name="SYN Ligne A" stroke="#a78bfa" strokeWidth={2.5}
+          <Line type="monotone" dataKey="syn" name="SYN" stroke="#a78bfa" strokeWidth={2.5}
             dot={false} activeDot={{ r: 5, stroke: "#a78bfa", strokeWidth: 2, fill: "#060d1a" }} />
-          <Line type="monotone" dataKey="intA" name="INT Ligne A" stroke="#fbbf24" strokeWidth={2.5}
-            dot={false} activeDot={{ r: 5, stroke: "#fbbf24", strokeWidth: 2, fill: "#060d1a" }} />
-
-          {/* Ligne B - Dashed */}
-          <Line type="monotone" dataKey="seB" name="SE Ligne B" stroke="#22d3ee" strokeWidth={2} strokeDasharray="5 5"
-            dot={false} activeDot={{ r: 5, stroke: "#22d3ee", strokeWidth: 2, fill: "#060d1a" }} />
-          <Line type="monotone" dataKey="synB" name="SYN Ligne B" stroke="#a78bfa" strokeWidth={2} strokeDasharray="5 5"
-            dot={false} activeDot={{ r: 5, stroke: "#a78bfa", strokeWidth: 2, fill: "#060d1a" }} />
-          <Line type="monotone" dataKey="intB" name="INT Ligne B" stroke="#fbbf24" strokeWidth={2} strokeDasharray="5 5"
+          <Line type="monotone" dataKey="intVal" name="INT" stroke="#fbbf24" strokeWidth={2.5}
             dot={false} activeDot={{ r: 5, stroke: "#fbbf24", strokeWidth: 2, fill: "#060d1a" }} />
         </LineChart>
       </ResponsiveContainer>

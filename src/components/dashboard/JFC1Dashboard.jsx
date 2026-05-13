@@ -1,4 +1,5 @@
 import useJFC1Data from "../../hooks/useJFC1Data";
+import usePerteData from "../../hooks/usePerteData";
 import { AlertPanel } from "./AlertPanel";
 import Topbar from "./Topbar";
 import Sidebar from "./Sidebar";
@@ -19,6 +20,8 @@ export default function JFC1Dashboard() {
     setShowAlertPanel,
     acquitter,
   } = useJFC1Data();
+
+  const { latest: perteLatest } = usePerteData();
 
   const toggleAlerts = () => setShowAlertPanel(v => !v);
 
@@ -54,17 +57,19 @@ export default function JFC1Dashboard() {
 
         {/* Canvas */}
         <main className="flex-1 overflow-y-auto p-5 bg-[#060d1a]">
-          {!indicateur && (
+          {(!indicateur && !perteLatest) && (
             <div className="flex items-center justify-center h-64 text-slate-600 text-sm">
               En attente des données Python...
             </div>
           )}
 
-          {indicateur && <>
-            <GypseSection data={indicateur} />
-            <YieldSection data={indicateur} />
-            <CapSection data={indicateur} capHistory={capHistory} />
-            <ConsumptionSection data={indicateur} />
+          {(indicateur || perteLatest) && <>
+            <GypseSection data={perteLatest || indicateur} />
+            {indicateur && <>
+              <YieldSection data={indicateur} />
+              <CapSection data={indicateur} capHistory={capHistory} />
+              <ConsumptionSection data={indicateur} />
+            </>}
           </>}
         </main>
       </div>
