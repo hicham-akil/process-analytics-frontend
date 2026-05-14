@@ -33,8 +33,8 @@ export default function HistoriqueDashboard() {
       time: d.date ? new Date(d.date).toLocaleTimeString("fr-MA", { hour: "2-digit", minute: "2-digit" }) : "",
       rc:   d.rc   != null ? +d.rc.toFixed(4)   : null,
       ri:   d.ri   != null ? +d.ri.toFixed(4)   : null,
-      se:   d.se   != null ? +d.se.toFixed(4)   : null,
       cap:  d.cap  != null ? +d.cap.toFixed(4)  : null,
+      h2so4: d.consoH2so4 != null ? +d.consoH2so4.toFixed(4) : null,
     }));
 
   return (
@@ -123,44 +123,58 @@ export default function HistoriqueDashboard() {
 
                 {/* ── Cartes stats ── */}
                 {stats && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    <StatCard label="RC moy."  s={stats.rc}  unit=""     isMin seuil={SEUILS.rc.min}  />
-                    <StatCard label="RI moy."  s={stats.ri}  unit=""     isMin seuil={SEUILS.ri.min}  />
-                    <StatCard label="SE moy."  s={stats.se}  unit="%"    isMin={false} seuil={SEUILS.se.max}  />
-                    <StatCard label="SYN moy." s={stats.syn} unit="%"    isMin={false} seuil={SEUILS.syn.max} />
-                    <StatCard label="CAP moy." s={stats.cap} unit=""     isMin={false} seuil={999}    />
-                    <StatCard label="H₂SO₄ moy." s={stats.consoH2so4} unit="T/T" isMin={false} seuil={SEUILS.consoH2so4.max} />
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <StatCard label="RC moy."     s={stats.rc}         unit=""    isMin        seuil={SEUILS.rc.min} />
+                    <StatCard label="RI moy."     s={stats.ri}         unit=""    isMin        seuil={SEUILS.ri.min} />
+                    <StatCard label="CAP moy."    s={stats.cap}        unit=""    isMin={false} seuil={999} />
+                    <StatCard label="H₂SO₄ moy."  s={stats.consoH2so4} unit="T/T" isMin={false} seuil={SEUILS.consoH2so4?.max ?? 3.8} />
                   </div>
                 )}
 
-                {/* ── Graphique RC / RI / SE ── */}
+                {/* ── Graphique RC / RI / CAP / H2SO4 ── */}
                 <div className="rounded-xl bg-slate-900/80 border border-white/5 p-5">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
                       ◉ Évolution sur la période
                     </p>
                     <div className="flex gap-4 text-[9px] text-slate-500">
-                      <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-emerald-400 rounded" />RC</span>
-                      <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-sky-400 rounded" />RI</span>
-                      <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-amber-400 rounded" />SE</span>
-                      <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-violet-400 rounded" />CAP</span>
+                      <span className="flex items-center gap-1">
+                        <span className="inline-block w-4 h-0.5 bg-emerald-400 rounded" />RC
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="inline-block w-4 h-0.5 bg-sky-400 rounded" />RI
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="inline-block w-4 h-0.5 bg-violet-400 rounded" />CAP
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="inline-block w-4 h-0.5 bg-amber-400 rounded" />H₂SO₄
+                      </span>
                     </div>
                   </div>
                   <ResponsiveContainer width="100%" height={220}>
                     <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                       <CartesianGrid stroke="rgba(255,255,255,.04)" vertical={false} />
-                      <XAxis dataKey="time" tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
-                        axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                      <YAxis domain={["auto", "auto"]} tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
-                        axisLine={false} tickLine={false} />
+                      <XAxis
+                        dataKey="time"
+                        tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis
+                        domain={["auto", "auto"]}
+                        tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
                       <Tooltip content={<HistoTooltip />} />
-                      <ReferenceLine y={SEUILS.rc.min} stroke="rgba(52,211,153,.15)" strokeDasharray="4 3" />
+                      <ReferenceLine y={SEUILS.rc.min} stroke="rgba(52,211,153,.15)"  strokeDasharray="4 3" />
                       <ReferenceLine y={SEUILS.ri.min} stroke="rgba(56,189,248,.15)"  strokeDasharray="4 3" />
-                      <ReferenceLine y={SEUILS.se.max} stroke="rgba(251,191,36,.15)"  strokeDasharray="4 3" />
-                      <Line type="monotone" dataKey="rc"  name="RC"  stroke="#34d399" strokeWidth={2} dot={false} connectNulls />
-                      <Line type="monotone" dataKey="ri"  name="RI"  stroke="#38bdf8" strokeWidth={2} dot={false} connectNulls />
-                      <Line type="monotone" dataKey="se"  name="SE"  stroke="#fbbf24" strokeWidth={2} dot={false} connectNulls />
-                      <Line type="monotone" dataKey="cap" name="CAP" stroke="#a78bfa" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 3" />
+                      <Line type="monotone" dataKey="rc"    name="RC"    stroke="#34d399" strokeWidth={2}   dot={false} connectNulls />
+                      <Line type="monotone" dataKey="ri"    name="RI"    stroke="#38bdf8" strokeWidth={2}   dot={false} connectNulls />
+                      <Line type="monotone" dataKey="cap"   name="CAP"   stroke="#a78bfa" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 3" />
+                      <Line type="monotone" dataKey="h2so4" name="H₂SO₄" stroke="#fbbf24" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="2 2" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -179,8 +193,11 @@ export default function HistoriqueDashboard() {
                     <table className="w-full text-left border-collapse min-w-[900px]">
                       <thead>
                         <tr className="bg-slate-950/50">
-                          {["Horodatage", "RC", "RI", "SE %", "SYN %", "CAP", "H₂SO₄", "Statut"].map(h => (
-                            <th key={h} className="px-3 py-2.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 text-center first:text-left">
+                          {["Horodatage", "RC", "RI", "CAP", "H₂SO₄", "Eau Brute", "Phosphates", "Statut"].map(h => (
+                            <th
+                              key={h}
+                              className="px-3 py-2.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 text-center first:text-left"
+                            >
                               {h}
                             </th>
                           ))}

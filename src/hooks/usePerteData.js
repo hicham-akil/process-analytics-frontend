@@ -44,8 +44,10 @@ export default function usePerteData() {
         const hist = await fetchHistoriquePerte();
         if (hist && hist.length > 0) {
           const formatted = hist.map(formatPoint);
-          setHistory(formatted);
-          setLatest(formatted[formatted.length - 1]);
+          // Sort ascending so latest is last
+          const sorted = [...formatted].sort((a, b) => new Date(a.date) - new Date(b.date));
+          setHistory(sorted.slice(-50));
+          setLatest(sorted[sorted.length - 1]);
           setLastUpdate(new Date());
         } else {
           const last = await fetchDernierPerte();
@@ -66,11 +68,22 @@ export default function usePerteData() {
       reconnectDelay: 5000,
       onConnect: () => {
         setConnected(true);
+
+        // Primary topic — broadcast by ingestPerte()
         client.subscribe("/topic/input/perte", (message) => {
           try {
             applyData(JSON.parse(message.body));
           } catch (e) {
             console.error("WS Perte parse error:", e);
+          }
+        });
+
+        // Fallback topic — some broker configs may use this
+        client.subscribe("/topic/perte", (message) => {
+          try {
+            applyData(JSON.parse(message.body));
+          } catch (e) {
+            console.error("WS Perte (fallback) parse error:", e);
           }
         });
       },
@@ -88,5 +101,22 @@ export default function usePerteData() {
     };
   }, [applyData]);
 
-  return { latest, history, connected, pulse, lastUpdate };
+  const stats = {
+    se:     computeStats(history, "se"),
+    syn:    computeStats(history, "syn"),
+    intVal: computeStats(history, "intVal"),
+  };
+
+  return { latest, history, connected, pulse, lastUpdate, stats };
+}
+
+function computeStats(history, key) {
+  const values = history.map(h => h[key]).filter(v => v != null && !isNaN(v));
+  if (!values.length) return { min: null, max: null, avg: null, count: 0 };
+  return {
+    min:   Math.min(...values),
+    max:   Math.max(...values),
+    avg:   values.reduce((a, b) => a + b, 0) / values.length,
+    count: values.length,
+  };
 }

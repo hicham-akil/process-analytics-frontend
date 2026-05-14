@@ -11,8 +11,7 @@ export default function useJFC1Data() {
   const [pulse, setPulse]           = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
 
-  // ── Alertes state ─────────────────────────────────────────────
-  const [alertes, setAlertes]           = useState([]);
+  const [alertes, setAlertes]               = useState([]);
   const [showAlertPanel, setShowAlertPanel] = useState(false);
 
   const stompRef = useRef(null);
@@ -23,25 +22,48 @@ export default function useJFC1Data() {
   }, []);
 
   const applyIndicateur = useCallback((data) => {
-    setIndicateur(data);
+    if (!data) return;
+
+    // Normalize — backend may send camelCase or snake_case depending on path
+    const normalized = {
+      id:               data.id,
+      date:             data.date,
+      rc:               data.rc               ?? data.RC               ?? null,
+      ri:               data.ri               ?? data.RI               ?? null,
+      cap:              data.cap              ?? data.CAP              ?? null,
+      consoH2so4:       data.consoH2so4       ?? data.conso_h2so4      ?? null,
+      consoEauBrute:    data.consoEauBrute    ?? data.conso_eau_brute  ?? null,
+      consoPhosphates:  data.consoPhosphates  ?? data.conso_phosphates ?? null,
+      consoVapeur:      data.consoVapeur      ?? data.conso_vapeur     ?? null,
+    };
+
+    console.debug("[JFC1] applyIndicateur →", normalized);
+
+    setIndicateur(normalized);
     setLastUpdate(new Date());
     setPulse(true);
     setTimeout(() => setPulse(false), 1000);
-    if (data.cap != null) {
-      const label = new Date(data.date).toLocaleTimeString("fr-MA", {
-        hour: "2-digit", minute: "2-digit"
+
+    if (normalized.cap != null) {
+      const label = new Date(normalized.date).toLocaleTimeString("fr-MA", {
+        hour: "2-digit", minute: "2-digit",
       });
-      setCapHistory(prev => [...prev, { time: label, cap: data.cap, target: 1.0 }].slice(-20));
+      setCapHistory(prev => [
+        ...prev,
+        { time: label, cap: normalized.cap, target: 1.0 },
+      ].slice(-20));
     }
   }, []);
 
-  // Chargement initial
+  // Initial load
   useEffect(() => {
     axios.get(`${API_BASE}/indicateurs/derniers`)
-      .then(res => { if (res.data) applyIndicateur(res.data); })
-      .catch(() => {});
+      .then(res => {
+        console.debug("[JFC1] REST /indicateurs/derniers →", res.data);
+        if (res.data) applyIndicateur(res.data);
+      })
+      .catch(err => console.error("[JFC1] Failed to load last indicateur:", err));
 
-    // Charger alertes actives initiales
     axios.get(`${API_BASE}/alertes/actives`)
       .then(res => setAlertes(res.data))
       .catch(() => {});
@@ -55,12 +77,12 @@ export default function useJFC1Data() {
       onConnect: () => {
         setConnected(true);
 
-        // Indicateurs temps réel
         client.subscribe("/topic/indicateurs", (msg) => {
-          applyIndicateur(JSON.parse(msg.body));
+          const data = JSON.parse(msg.body);
+          console.debug("[JFC1] WS /topic/indicateurs →", data);
+          applyIndicateur(data);
         });
 
-        // Alertes temps réel
         client.subscribe("/topic/alertes", (msg) => {
           const nouvellesAlertes = JSON.parse(msg.body);
           setAlertes(prev => {
@@ -68,18 +90,18 @@ export default function useJFC1Data() {
             const nouvelles = nouvellesAlertes.filter(a => !ids.has(a.id));
             return [...nouvelles, ...prev].slice(0, 50);
           });
-          setShowAlertPanel(true); // ouvrir automatiquement
+          setShowAlertPanel(true);
         });
       },
       onDisconnect: () => setConnected(false),
-      onStompError: () => setConnected(false),
+      onStompError:  () => setConnected(false),
     });
+
     client.activate();
     stompRef.current = client;
     return () => client.deactivate();
   }, [applyIndicateur]);
 
-  // Acquitter une alerte
   const acquitter = async (id) => {
     try {
       await axios.patch(`${API_BASE}/alertes/${id}/acquitter`);
