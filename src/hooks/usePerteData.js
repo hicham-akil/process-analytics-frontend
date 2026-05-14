@@ -5,10 +5,10 @@ import { API_BASE } from "../config/seuils";
 import { fetchDernierPerte, fetchHistoriquePerte } from "../services/perteService";
 
 export default function usePerteData() {
-  const [latest, setLatest] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [latest, setLatest]       = useState(null);
+  const [history, setHistory]     = useState([]);
   const [connected, setConnected] = useState(false);
-  const [pulse, setPulse] = useState(true);
+  const [pulse, setPulse]         = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
 
   const clientRef = useRef(null);
@@ -22,9 +22,9 @@ export default function usePerteData() {
     time: data.date
       ? new Date(data.date).toLocaleTimeString()
       : new Date().toLocaleTimeString(),
-    date: data.date,
-    se: data.se,
-    syn: data.syn,
+    date:   data.date,
+    se:     data.se,
+    syn:    data.syn,
     intVal: data.intVal,
   });
 
@@ -44,10 +44,8 @@ export default function usePerteData() {
         const hist = await fetchHistoriquePerte();
         if (hist && hist.length > 0) {
           const formatted = hist.map(formatPoint);
-          // Sort ascending so latest is last
-          const sorted = [...formatted].sort((a, b) => new Date(a.date) - new Date(b.date));
-          setHistory(sorted.slice(-50));
-          setLatest(sorted[sorted.length - 1]);
+          setHistory(formatted);
+          setLatest(formatted[formatted.length - 1]);
           setLastUpdate(new Date());
         } else {
           const last = await fetchDernierPerte();
@@ -68,8 +66,6 @@ export default function usePerteData() {
       reconnectDelay: 5000,
       onConnect: () => {
         setConnected(true);
-
-        // Primary topic — broadcast by ingestPerte()
         client.subscribe("/topic/input/perte", (message) => {
           try {
             applyData(JSON.parse(message.body));
@@ -77,22 +73,14 @@ export default function usePerteData() {
             console.error("WS Perte parse error:", e);
           }
         });
-
-        // Fallback topic — some broker configs may use this
-        client.subscribe("/topic/perte", (message) => {
-          try {
-            applyData(JSON.parse(message.body));
-          } catch (e) {
-            console.error("WS Perte (fallback) parse error:", e);
-          }
-        });
       },
       onDisconnect: () => setConnected(false),
-      onStompError: () => setConnected(false),
+      onStompError:  () => setConnected(false),
     });
 
     client.activate();
     clientRef.current = client;
+
     return () => {
       if (clientRef.current) {
         clientRef.current.deactivate();
