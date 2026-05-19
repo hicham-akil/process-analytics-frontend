@@ -7,8 +7,31 @@ import {
   Save,
   CheckCircle2,
   AlertTriangle,
+  Droplets,
 } from "lucide-react";
 import { createPerte } from "../../services/perteService";
+
+// ✅ fields array defined outside the component
+const fields = [
+  {
+    name: "se",
+    label: "SE",
+    placeholder: "0.00",
+    icon: Droplets,
+  },
+  {
+    name: "syn",
+    label: "SYN",
+    placeholder: "0.00",
+    icon: Layers3,
+  },
+  {
+    name: "intVal",
+    label: "INT",
+    placeholder: "0.00",
+    icon: Activity,
+  },
+];
 
 export default function PerteForm({ onSuccess }) {
   const [formData, setFormData] = useState({
@@ -17,17 +40,12 @@ export default function PerteForm({ onSuccess }) {
     syn: "",
     intVal: "",
   });
-
   const [loading, setLoading] = useState(false);
-
-  const [message, setMessage] = useState({
-    type: "",
-    text: "",
-  });
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -36,46 +54,41 @@ export default function PerteForm({ onSuccess }) {
     setMessage({ type: "", text: "" });
 
     try {
-      const dataToSubmit = {
-        ...formData,
-        se: parseFloat(formData.se),
-        syn: parseFloat(formData.syn),
-        intVal: parseFloat(formData.intVal),
-      };
+      const se     = parseFloat(formData.se);
+      const syn    = parseFloat(formData.syn);
+      const intVal = parseFloat(formData.intVal);
 
-      if (
-        isNaN(dataToSubmit.se) ||
-        isNaN(dataToSubmit.syn) ||
-        isNaN(dataToSubmit.intVal)
-      ) {
+      if (isNaN(se) || isNaN(syn) || isNaN(intVal)) {
         throw new Error("Tous les champs numériques sont obligatoires.");
       }
 
+      // ✅ append seconds so Spring Boot LocalDateTime parses correctly
+      // "2026-05-18T14:30" → "2026-05-18T14:30:00"
+      const dateWithSeconds = formData.date.length === 16
+        ? formData.date + ":00"
+        : formData.date;
+
+      const dataToSubmit = { date: dateWithSeconds, se, syn, intVal };
+
       await createPerte(dataToSubmit);
 
-      setMessage({
-        type: "success",
-        text: "Analyse enregistrée avec succès.",
-      });
+      setMessage({ type: "success", text: "Données de perte enregistrées avec succès !" });
 
+      // trigger refetch in parent so history updates immediately
       if (onSuccess) onSuccess();
 
-      setFormData((prev) => ({ ...prev, se: "", syn: "", intVal: "" }));
+      // Reset numeric fields, keep date
+      setFormData(prev => ({ ...prev, se: "", syn: "", intVal: "" }));
+
     } catch (err) {
       setMessage({
         type: "error",
-        text: err.message || "Une erreur est survenue lors de l'enregistrement.",
+        text: err.response?.data?.erreur || err.message || "Une erreur est survenue lors de l'enregistrement.",
       });
     } finally {
       setLoading(false);
     }
   };
-
-  const fields = [
-    { label: "Se",  name: "se",     placeholder: "0.00", icon: FlaskConical },
-    { label: "Syn", name: "syn",    placeholder: "0.00", icon: Layers3 },
-    { label: "Int", name: "intVal", placeholder: "0.00", icon: Activity },
-  ];
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -105,7 +118,7 @@ export default function PerteForm({ onSuccess }) {
         <div>
           <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             <CalendarDays size={16} />
-            Date & Heure
+            Date &amp; Heure
           </label>
           <input
             type="datetime-local"
@@ -131,7 +144,6 @@ export default function PerteForm({ onSuccess }) {
                   <span>{field.label}</span>
                 </label>
 
-                {/* Input wrapper: flex row keeps value and % side by side */}
                 <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-3 transition-all focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 dark:border-slate-600 dark:bg-slate-900">
                   <input
                     type="number"
