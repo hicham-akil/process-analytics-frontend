@@ -8,8 +8,8 @@ import GypseGauges from "./GypseGauges";
 import GypseRawTable from "./GypseRawTable";
 
 export default function GypseDashboard() {
-  const { latest, history, connected, pulse, lastUpdate, stats } = useGypseData();
-  const { latest: perteLatest, history: perteHistory } = usePerteData();
+  const { latest, history, connected, pulse, lastUpdate } = useGypseData();
+  const { latest: perteLatest, history: perteHistory, stats: perteStats } = usePerteData();
 
   return (
     <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
@@ -30,7 +30,7 @@ export default function GypseDashboard() {
 
         {latest && (
           <div className="space-y-6 max-w-[1400px] mx-auto">
-            {/* Raw Data Table - NEW SECTION */}
+
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
@@ -75,12 +75,13 @@ export default function GypseDashboard() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                  ◈ Statistiques de Session (Gypse)
+                  ◈ Statistiques de Session (Pertes)
                 </span>
                 <div className="flex-1 h-px bg-white/5" />
               </div>
-              <GypseStatsPanel stats={stats} />
+              <GypseStatsPanel stats={perteStats} />
             </div>
+
           </div>
         )}
       </main>

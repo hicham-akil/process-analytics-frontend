@@ -5,30 +5,32 @@ import PerteForm from "./PerteForm";
 import PerteHistory from "./PerteHistory";
 
 export default function PerteDashboard() {
-  const { latest, history, connected, pulse, lastUpdate } = usePerteData();
+  // ✅ destructure refetch from the hook
+  const { latest, history, connected, pulse, lastUpdate, refetch } = usePerteData();
 
   return (
     <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
-      <Topbar 
-        connected={connected} 
-        pulse={pulse} 
-        lastUpdate={lastUpdate} 
-        alertesCount={0} // To be updated if needed
-        onToggleAlerts={() => {}} 
+      <Topbar
+        connected={connected}
+        pulse={pulse}
+        lastUpdate={lastUpdate}
+        alertesCount={0}
+        onToggleAlerts={() => {}}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          alertesCount={0} 
-          connected={connected} 
-          onToggleAlerts={() => {}} 
+        <Sidebar
+          alertesCount={0}
+          connected={connected}
+          onToggleAlerts={() => {}}
         />
 
         <main className="flex-1 overflow-y-auto p-6 bg-[#060d1a]">
           <div className="max-w-[1200px] mx-auto space-y-8">
             <header>
               <h1 className="text-2xl font-black tracking-tighter text-slate-100 uppercase italic">
-                Saisie & Historique <span className="text-emerald-400 text-3xl">Pertes Gypse</span>
+                Saisie &amp; Historique{" "}
+                <span className="text-emerald-400 text-3xl">Pertes Gypse</span>
               </h1>
               <p className="text-slate-500 text-[10px] font-bold tracking-[.2em] uppercase mt-1">
                 Module de gestion manuelle des indicateurs de perte
@@ -44,7 +46,8 @@ export default function PerteDashboard() {
                     </span>
                     <div className="flex-1 h-px bg-white/5" />
                   </div>
-                  <PerteForm />
+                  {/* ✅ pass refetch as onSuccess so history reloads after save */}
+                  <PerteForm onSuccess={refetch} />
                 </div>
               </div>
 
@@ -56,6 +59,7 @@ export default function PerteDashboard() {
                     </span>
                     <div className="flex-1 h-px bg-white/5" />
                   </div>
+                  {/* ✅ history is now always fresh after every submission */}
                   <PerteHistory history={history} />
                 </div>
               </div>

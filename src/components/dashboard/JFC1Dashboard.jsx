@@ -28,7 +28,6 @@ export default function JFC1Dashboard() {
   return (
     <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
 
-      {/* Alert Panel overlay */}
       {showAlertPanel && (
         <AlertPanel
           alertes={alertesNonAcquittees}
@@ -37,7 +36,6 @@ export default function JFC1Dashboard() {
         />
       )}
 
-      {/* Topbar */}
       <Topbar
         connected={connected}
         pulse={pulse}
@@ -47,15 +45,12 @@ export default function JFC1Dashboard() {
       />
 
       <div className="flex flex-1 overflow-hidden">
-
-        {/* Sidebar */}
         <Sidebar
           alertesCount={alertesNonAcquittees.length}
           connected={connected}
           onToggleAlerts={toggleAlerts}
         />
 
-        {/* Canvas */}
         <main className="flex-1 overflow-y-auto p-5 bg-[#060d1a]">
           {(!indicateur && !perteLatest) && (
             <div className="flex items-center justify-center h-64 text-slate-600 text-sm">
@@ -63,14 +58,18 @@ export default function JFC1Dashboard() {
             </div>
           )}
 
-          {(indicateur || perteLatest) && <>
-            <GypseSection data={perteLatest || indicateur} />
-            {indicateur && <>
-              <YieldSection data={indicateur} />
-              <CapSection data={indicateur} capHistory={capHistory} />
-              <ConsumptionSection data={indicateur} />
-            </>}
-          </>}
+          {(indicateur || perteLatest) && (
+            <>
+              {perteLatest && <GypseSection data={perteLatest} />}
+              {indicateur && (
+                <>
+                  <YieldSection data={indicateur} />
+                  <CapSection data={indicateur} capHistory={capHistory} />
+                  <ConsumptionSection data={indicateur} />
+                </>
+              )}
+            </>
+          )}
         </main>
       </div>
     </div>

@@ -35,16 +35,40 @@ export default function usePerteData() {
     setLastUpdate(new Date());
     setPulse(true);
     setTimeout(() => setPulse(false), 500);
-    setHistory(prev => [...prev.slice(-49), point]);
+    setHistory(prev => {
+      // Avoid duplicates by date
+      const exists = prev.some(p => p.date === point.date);
+      if (exists) return prev;
+      return [...prev.slice(-49), point];
+    });
   }, []);
 
+  // ✅ NEW: refetch from REST — called after manual form submission
+  const refetch = useCallback(async () => {
+    try {
+      const hist = await fetchHistoriquePerte();
+      if (hist && hist.length > 0) {
+        const formatted = hist.map(formatPoint);
+        const sorted = [...formatted].sort((a, b) => new Date(a.date) - new Date(b.date));
+        setHistory(sorted.slice(-50));
+        setLatest(sorted[sorted.length - 1]);
+        setLastUpdate(new Date());
+      } else {
+        const last = await fetchDernierPerte();
+        if (last) applyData(last);
+      }
+    } catch (err) {
+      console.error("Error refetching perte data:", err);
+    }
+  }, [applyData]);
+
+  // Initial load
   useEffect(() => {
     const loadInitial = async () => {
       try {
         const hist = await fetchHistoriquePerte();
         if (hist && hist.length > 0) {
           const formatted = hist.map(formatPoint);
-          // Sort ascending so latest is last
           const sorted = [...formatted].sort((a, b) => new Date(a.date) - new Date(b.date));
           setHistory(sorted.slice(-50));
           setLatest(sorted[sorted.length - 1]);
@@ -60,6 +84,7 @@ export default function usePerteData() {
     loadInitial();
   }, [applyData]);
 
+  // WebSocket
   useEffect(() => {
     if (clientRef.current) return;
 
@@ -69,7 +94,6 @@ export default function usePerteData() {
       onConnect: () => {
         setConnected(true);
 
-        // Primary topic — broadcast by ingestPerte()
         client.subscribe("/topic/input/perte", (message) => {
           try {
             applyData(JSON.parse(message.body));
@@ -78,7 +102,6 @@ export default function usePerteData() {
           }
         });
 
-        // Fallback topic — some broker configs may use this
         client.subscribe("/topic/perte", (message) => {
           try {
             applyData(JSON.parse(message.body));
@@ -107,7 +130,8 @@ export default function usePerteData() {
     intVal: computeStats(history, "intVal"),
   };
 
-  return { latest, history, connected, pulse, lastUpdate, stats };
+  // ✅ refetch is now exported
+  return { latest, history, connected, pulse, lastUpdate, stats, refetch };
 }
 
 function computeStats(history, key) {

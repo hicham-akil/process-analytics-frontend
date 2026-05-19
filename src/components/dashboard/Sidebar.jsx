@@ -1,24 +1,49 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const DASHBOARDS = [
-  { icon: "◉", label: "Moniteur JFC1",      path: "/" },
-  { icon: "✍", label: "Saisie Pertes",      path: "/perte" },
-  { icon: "⬡", label: "Analyse Gypse",      path: "/gypse" },
-  { icon: "⊕", label: "Analyse Phosphate",  path: "/phosphate" },
-  { icon: "⊞", label: "Analyse Production", path: "/production" },
-  { icon: "◷", label: "Historique JFC1",    path: "/historique" },
+  { icon: "◉", label: "Moniteur JFC1",      path: "/",          laboOnly: false },
+  { icon: "✍", label: "Saisie Pertes",      path: "/perte",     laboOnly: true  },
+  { icon: "⬡", label: "Analyse Gypse",      path: "/gypse",     laboOnly: false },
+  { icon: "⊕", label: "Analyse Phosphate",  path: "/phosphate", laboOnly: false },
+  { icon: "⊞", label: "Analyse Production", path: "/production",laboOnly: false },
+  { icon: "◷", label: "Historique JFC1",    path: "/historique",laboOnly: false },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
   const navigate  = useNavigate();
   const location  = useLocation();
+  const { isLabo, user, logout } = useAuth();
+
+  const visibleDashboards = DASHBOARDS.filter(d => !d.laboOnly || isLabo);
 
   return (
     <nav className="w-52 flex-shrink-0 bg-[#060d1a] border-r border-white/5 flex flex-col py-4 overflow-y-auto">
 
+      {/* User badge */}
+      <div className="px-4 mb-4">
+        <div className="flex items-center justify-between bg-slate-900 rounded-lg px-3 py-2 border border-white/5">
+          <div>
+            <p className="text-[9px] font-bold text-slate-300">{user?.username}</p>
+            <p className={`text-[8px] font-bold uppercase tracking-wider ${isLabo ? "text-emerald-400" : "text-slate-500"}`}>
+              {user?.role}
+            </p>
+          </div>
+          <button
+            onClick={logout}
+            title="Déconnexion"
+            className="text-slate-600 hover:text-red-400 transition-colors text-[10px] font-bold"
+          >
+            ⏻
+          </button>
+        </div>
+      </div>
+
+      <div className="h-px bg-white/5 mx-4 mb-3" />
+
       {/* Dashboard switcher */}
       <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 px-4 mb-3">Tableaux de bord</p>
-      {DASHBOARDS.map((d) => {
+      {visibleDashboards.map((d) => {
         const isActive = location.pathname === d.path;
         return (
           <button key={d.path}
@@ -37,7 +62,7 @@ export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
       <div className="h-px bg-white/5 mx-4 my-3" />
 
       {/* Alertes sidebar */}
-      <div className="mt-6 px-4">
+      <div className="mt-2 px-4">
         <p className="text-[9px] font-bold tracking-[.12em] uppercase text-slate-600 mb-3">Alertes</p>
         <button
           onClick={onToggleAlerts}
