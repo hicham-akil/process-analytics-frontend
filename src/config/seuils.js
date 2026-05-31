@@ -1,6 +1,6 @@
   
-export const API_BASE = "http://localhost:8080/api";
-export const WS_URL   = "http://localhost:8080/api/ws-jfc1";
+export const API_BASE = "/api";    
+export const WS_URL = "/api/ws-jfc1";
 
 
 export const SEUILS_NIVEAUX = {
