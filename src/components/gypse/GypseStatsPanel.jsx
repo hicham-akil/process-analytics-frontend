@@ -1,24 +1,18 @@
 import { SEUILS, fmt } from "../../config/seuils";
+import { Activity, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 const METRIC_CONFIG = [
-  { key: "se",     label: "SE",  color: "cyan",   seuil: SEUILS.se.max },
-  { key: "syn",    label: "SYN", color: "violet", seuil: SEUILS.syn.max },
-  { key: "intVal", label: "INT", color: "amber",  seuil: SEUILS.intVal.max },
+  { key: "se",     label: "SE",  color: "var(--accent-cyan)",   seuil: SEUILS.se.max },
+  { key: "syn",    label: "SYN", color: "var(--accent-blue)",   seuil: SEUILS.syn.max },
+  { key: "intVal", label: "INT", color: "var(--accent-amber)",  seuil: SEUILS.intVal.max },
 ];
 
-const COLOR_MAP = {
-  cyan:   { text: "text-cyan-400",   bg: "bg-cyan-400",   border: "border-cyan-500/20", bgLight: "bg-cyan-500/10" },
-  violet: { text: "text-violet-400", bg: "bg-violet-400", border: "border-violet-500/20", bgLight: "bg-violet-500/10" },
-  amber:  { text: "text-amber-400",  bg: "bg-amber-400",  border: "border-amber-500/20", bgLight: "bg-amber-500/10" },
-};
-
 function StatRow({ label, value, color }) {
-  const c = COLOR_MAP[color];
   return (
-    <div className="flex items-center justify-between py-1.5">
-      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{label}</span>
-      <span className={`text-[10px] font-bold font-mono ${value != null ? c.text : "text-slate-600"}`}>
-        {fmt(value)}
+    <div className="flex items-center justify-between py-2">
+      <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{label}</span>
+      <span className={`text-[12px] font-bold font-mono`} style={{ color: value != null ? "var(--text-primary)" : "var(--text-muted)" }}>
+        {value != null ? fmt(value, 4) : "—"}
       </span>
     </div>
   );
@@ -27,45 +21,54 @@ function StatRow({ label, value, color }) {
 export default function GypseStatsPanel({ stats }) {
   if (!stats) return null;
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-slide-up">
       {METRIC_CONFIG.map(({ key, label, color, seuil }) => {
         const s = stats[key] || {};
-        const c = COLOR_MAP[color];
+        const isAlert = s.avg != null && s.avg > seuil;
+        
         return (
-          <div key={label} className="rounded-xl bg-slate-900/80 border border-white/5 p-5 backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <div className={`w-2.5 h-2.5 rounded-full ${c.bg}`} />
-              <span className={`text-xs font-black tracking-wider ${c.text}`}>{label}</span>
-              <span className="text-[9px] text-slate-600 ml-auto font-mono">{s.count || 0} pts</span>
+          <div key={label} className="relative overflow-hidden rounded-2xl bg-background-cards border border-border-subtle p-6 shadow-xl group hover:border-border-medium transition-all">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-2 h-4 rounded-full" style={{ backgroundColor: color }} />
+              <span className="text-sm font-bold text-text-primary tracking-tight">{label}</span>
+              <span className="text-[10px] font-bold text-text-muted ml-auto bg-background-base px-2 py-0.5 rounded border border-border-subtle">
+                {s.count || 0} RELEVÉS
+              </span>
             </div>
 
-            <div className="space-y-0.5 border-t border-white/5 pt-3">
-              <StatRow label="Minimum" value={s.min} color={color} />
-              <StatRow label="Maximum" value={s.max} color={color} />
-              <StatRow label="Moyenne" value={s.avg} color={color} />
-              <div className="border-t border-white/5 mt-2 pt-2 flex justify-between items-center">
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Seuil Max</span>
-                <span className={`text-[10px] font-bold font-mono text-slate-300`}>{seuil}</span>
-              </div>
+            <div className="space-y-1 divide-y divide-border-subtle/50">
+              <StatRow label="Minimum" value={s.min} />
+              <StatRow label="Maximum" value={s.max} />
+              <StatRow label="Moyenne de session" value={s.avg} />
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-border-subtle flex justify-between items-center">
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Limite Critique</span>
+              <span className="text-[11px] font-mono font-bold text-text-secondary">{seuil}%</span>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-6">
               {s.avg != null ? (
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-[9px] font-bold ${
-                  s.avg > seuil
-                    ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                <div className={`flex items-center gap-2 px-4 py-3 rounded-xl border text-[11px] font-bold transition-all ${
+                  isAlert
+                    ? "bg-accent-red/10 border-accent-red/20 text-accent-red"
+                    : "bg-accent-green/10 border-accent-green/20 text-accent-green"
                 }`}>
-                  <span>{s.avg > seuil ? "⚠" : "✓"}</span>
-                  <span>{s.avg > seuil ? "Moyenne hors seuil" : "Moyenne dans la norme"}</span>
+                  {isAlert ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
+                  <span className="uppercase tracking-wide">
+                    {isAlert ? "Attention: Moyenne Élevée" : "Performance Optimale"}
+                  </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/5 bg-slate-800/50 text-[9px] font-bold text-slate-600">
-                  <span>◌</span>
-                  <span>En attente de données</span>
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-border-subtle bg-background-base/50 text-[11px] font-bold text-text-muted">
+                  <Activity size={14} className="animate-pulse" />
+                  <span className="uppercase tracking-wide">Acquisition en cours...</span>
                 </div>
               )}
             </div>
+            
+            {/* Background decorative element */}
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-[0.03] pointer-events-none" style={{ backgroundColor: color }} />
           </div>
         );
       })}

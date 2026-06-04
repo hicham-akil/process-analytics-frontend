@@ -4,8 +4,9 @@ import PerteTopbar from "./PerteTopbar";
 import Sidebar from "../dashboard/Sidebar";
 import PerteForm from "./PerteForm";
 import PerteHistory from "./PerteHistory";
+import PerteKPICards from "./PerteKPICard";
 import { AlertPanel } from "../dashboard/AlertPanel";
-import { ClipboardEdit, History } from "lucide-react";
+import { ClipboardEdit, History, Activity } from "lucide-react";
 import SectionHead from "../dashboard/shared/SectionHead";
 
 export default function PerteDashboard() {
@@ -46,7 +47,7 @@ export default function PerteDashboard() {
         />
 
         <main className="flex-1 overflow-y-auto p-8 ml-16 bg-background-base">
-          <div className="max-w-7xl mx-auto space-y-10 animate-fade-slide-up">
+          <div className="max-w-7xl mx-auto space-y-12 animate-fade-slide-up">
             <header className="flex flex-col gap-2">
               <h1 className="text-3xl font-black tracking-tight text-text-primary uppercase">
                 Saisie & <span className="text-accent-green">Indicateurs Gypse</span>
@@ -55,6 +56,11 @@ export default function PerteDashboard() {
                 Module de gestion manuelle des performances
               </p>
             </header>
+
+            <section className="space-y-6">
+              <SectionHead icon={<Activity size={16} />} label="Derniers indicateurs enregistrés" />
+              <PerteKPICards data={latest} />
+            </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-10">
               <section className="space-y-6">

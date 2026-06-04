@@ -1,4 +1,5 @@
 import { SEUILS } from "../../config/seuils";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 export default function TableRow({ row, index }) {
   const rcBad  = row.rc  != null && row.rc  < SEUILS.rc.min;
@@ -8,26 +9,36 @@ export default function TableRow({ row, index }) {
   const hasBad = rcBad || riBad || capBad || h2so4Bad;
 
   const cell = (v, bad) => (
-    <span className={`font-mono font-bold ${bad ? "text-amber-400" : "text-slate-200"}`}>
+    <span className={`font-mono font-bold text-sm ${bad ? "text-accent-amber" : "text-text-primary"}`}>
       {v != null ? Number(v).toFixed(4) : "—"}
     </span>
   );
 
   return (
-    <tr className={`border-b border-white/5 hover:bg-white/[.03] transition-colors ${hasBad ? "bg-amber-500/[.03]" : ""}`}>
-      <td className="px-3 py-2.5 text-[9px] text-slate-500 font-mono whitespace-nowrap">
+    <tr className={`group border-b border-border-subtle/50 hover:bg-white/[.02] transition-colors ${hasBad ? "bg-accent-amber/[.02]" : ""}`}>
+      <td className="px-4 py-3 text-[11px] text-text-muted font-mono whitespace-nowrap group-hover:text-text-secondary transition-colors">
         {row.date ? new Date(row.date).toLocaleString("fr-MA") : "—"}
       </td>
-      <td className="px-3 py-2.5 text-center">{cell(row.rc,  rcBad)}</td>
-      <td className="px-3 py-2.5 text-center">{cell(row.ri,  riBad)}</td>
-      <td className="px-3 py-2.5 text-center">{cell(row.cap, capBad)}</td>
-      <td className="px-3 py-2.5 text-center">{cell(row.consoH2so4,      h2so4Bad)}</td>
-      <td className="px-3 py-2.5 text-center">{cell(row.consoEauBrute,   false)}</td>
-      <td className="px-3 py-2.5 text-center">{cell(row.consoPhosphates, false)}</td>
-      <td className="px-3 py-2.5 text-center">
+      <td className="px-4 py-3 text-center">{cell(row.rc,  rcBad)}</td>
+      <td className="px-4 py-3 text-center">{cell(row.ri,  riBad)}</td>
+      <td className="px-4 py-3 text-center">{cell(row.cap, capBad)}</td>
+      <td className="px-4 py-3 text-center">{cell(row.consoH2so4,      h2so4Bad)}</td>
+      <td className="px-4 py-3 text-center">{cell(row.consoEauBrute,   false)}</td>
+      <td className="px-4 py-3 text-center">{cell(row.consoPhosphates, false)}</td>
+      <td className="px-4 py-3 text-center">
         {hasBad
-          ? <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">⚠ HORS SEUIL</span>
-          : <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">✓ OK</span>
+          ? (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent-amber/10 border border-accent-amber/20 text-accent-amber">
+              <AlertTriangle size={12} />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Hors Seuil</span>
+            </div>
+          )
+          : (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent-green/10 border border-accent-green/20 text-accent-green">
+              <CheckCircle2 size={12} />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Normal</span>
+            </div>
+          )
         }
       </td>
     </tr>
