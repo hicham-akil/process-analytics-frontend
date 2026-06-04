@@ -1,6 +1,6 @@
   
-export const API_BASE = "/api";    
-export const WS_URL = "/api/ws-jfc1";
+export const API_BASE = "http://localhost:8080/api";
+export const WS_URL = "http://localhost:8080/api/ws-jfc1";
 
 
 export const SEUILS_NIVEAUX = {
@@ -56,12 +56,11 @@ export const isEnAlerte = (key, value) => getNiveau(key, value) != null;
 
 /**
  * Couleur Tailwind selon le niveau
- * Usage: <td className={couleurNiveau(getNiveau("rc", val))}>
  */
 export const couleurNiveau = (niveau) => {
-  if (niveau === "critique") return "bg-red-100 text-red-700 font-semibold";
-  if (niveau === "warning")  return "bg-yellow-100 text-yellow-700";
-  return "";
+  if (niveau === "critique") return "text-accent-red font-semibold";
+  if (niveau === "warning")  return "text-accent-amber";
+  return "text-text-secondary";
 };
 
 /** Formate une valeur numérique */

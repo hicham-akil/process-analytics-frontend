@@ -1,89 +1,79 @@
 import SectionHead from "./shared/SectionHead";
 import { SEUILS } from "../../config/seuils";
+import { TrendingUp, Target } from "lucide-react";
 
-function RingMeter({ value, minSeuil, size = 96 }) {
-  const r = 15.9;
-
-  // value is in 0-1 range (e.g. 0.8458)
-  // Fill the ring relative to the seuil: 100% = seuil, scale beyond it
-  const pct = value != null ? Math.min((value / 1.0) * 100, 100) : 0;
-
+function YieldCard({ label, keyName, value, minSeuil, icon: Icon }) {
   const isAmber = value != null && value < minSeuil;
-
+  const progress = value != null ? Math.min((value / 1.0) * 100, 100) : 0;
+  
   return (
-    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 36 36" className="w-full h-full" style={{ transform: "rotate(-90deg)" }}>
-        <circle cx="18" cy="18" r={r} fill="none" stroke="rgba(255,255,255,.06)" strokeWidth="3" />
-        <circle
-          cx="18" cy="18" r={r} fill="none"
-          stroke={isAmber ? "#fbbf24" : "#00e87a"}
-          strokeWidth="3.5"
-          strokeDasharray={`${pct} 100`}
-          strokeLinecap="round"
-        />
-      </svg>
-
-      <div className="absolute inset-0 flex items-center justify-center font-bold text-xl font-mono"
-        style={{ color: isAmber ? "#fbbf24" : "#00e87a" }}>
-        {value != null ? value.toFixed(4) : "—"}
-      </div>
-    </div>
-  );
-}
-
-function YieldCard({ label, keyName, value, minSeuil }) {
-  const isAmber = value != null && value < minSeuil;
-  return (
-    <div className={`rounded-lg bg-slate-900 border border-white/5 border-t-2 p-4 flex items-center justify-between ${
-      isAmber ? "border-t-amber-400" : "border-t-emerald-400"
-    }`}>
-      <div>
-        <h4 className="text-2xl font-bold text-slate-100 mb-0.5">{keyName}</h4>
-        <p className="text-[10px] text-slate-500 tracking-wide">{label}</p>
-        <div className="flex gap-2 mt-3 items-center">
-          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wide border ${
-            isAmber
-              ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-              : "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-          }`}>
-            {isAmber ? "Sous seuil" : "Optimal"}
-          </span>
-          <span className="text-[9px] text-slate-500">
-            Seuil min: {(minSeuil * 100).toFixed(0)}%
-          </span>
+    <div className={`relative overflow-hidden rounded-xl bg-background-cards border border-border-subtle p-5 shadow-lg transition-all hover:border-border-medium group animate-fade-slide-up`}>
+      {/* Top border status indicator */}
+      <div className={`absolute top-0 left-0 w-full h-[2px] ${
+        isAmber ? "bg-accent-amber shadow-[0_2px_10px_rgba(245,158,11,0.3)]" : "bg-accent-green shadow-[0_2px_10px_rgba(16,185,129,0.3)]"
+      }`} />
+      
+      <div className="flex items-start justify-between mb-4">
+        <div className={`p-2 rounded-lg ${isAmber ? "bg-accent-amber/10 text-accent-amber" : "bg-accent-green/10 text-accent-green"}`}>
+          <Icon size={18} />
         </div>
+        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+          isAmber ? "bg-accent-amber/20 text-accent-amber" : "bg-accent-green/20 text-accent-green"
+        }`}>
+          {isAmber ? "Attention" : "Optimal"}
+        </span>
+      </div>
 
-        {/* Raw value display for clarity */}
-        <div className="mt-2 flex items-baseline gap-1">
-          <span className={`text-3xl font-bold font-mono tracking-tight ${isAmber ? "text-amber-400" : "text-slate-100"}`}>
+      <div className="flex flex-col items-center justify-center py-2">
+        <span className="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">{label}</span>
+        <div className="flex items-baseline gap-1">
+          <span className={`text-4xl font-semibold font-mono tracking-tighter ${isAmber ? "text-accent-amber" : "text-text-primary"}`}>
             {value != null ? (value * 100).toFixed(2) : "—"}
           </span>
-          <span className="text-slate-500 text-sm font-bold">%</span>
+          <span className="text-text-muted text-lg font-medium">%</span>
         </div>
       </div>
-      <RingMeter value={value} minSeuil={minSeuil} />
+
+      <div className="mt-6 space-y-2">
+        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-text-muted">
+          <span>Progression</span>
+          <span>{progress.toFixed(1)}%</span>
+        </div>
+        <div className="h-1.5 w-full bg-background-base rounded-full overflow-hidden">
+          <div 
+            className={`h-full transition-all duration-1000 ease-out ${isAmber ? "bg-accent-amber" : "bg-accent-green"}`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between text-[9px] text-text-muted">
+          <span>Seuil min: {(minSeuil * 100).toFixed(0)}%</span>
+          <span className="font-mono">{keyName}</span>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function YieldSection({ data }) {
   return (
-    <>
-      <SectionHead icon="◈" label="Rendements" />
-      <div className="grid grid-cols-2 gap-3 mb-5">
+    <div className="mb-8">
+      <SectionHead icon={<TrendingUp size={16} />} label="Rendements Industriels" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <YieldCard
           keyName="RC"
           label="Rendement Chimique"
           value={data.rc}
           minSeuil={SEUILS.rc.min}
+          icon={Target}
         />
         <YieldCard
           keyName="RI"
           label="Rendement Industrielle"
           value={data.ri}
           minSeuil={SEUILS.ri.min}
+          icon={TrendingUp}
         />
       </div>
-    </>
+    </div>
   );
 }

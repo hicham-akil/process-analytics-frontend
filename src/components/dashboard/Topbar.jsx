@@ -3,6 +3,7 @@ import { AlertBadge } from "./AlertPanel";
 import LivePill from "./shared/LivePill";
 import Clock from "./shared/Clock";
 import { API_BASE } from "../../config/seuils";
+import { FileDown, Settings, User } from "lucide-react";
 
 function BoutonRapport() {
   const [loading, setLoading] = useState(false);
@@ -29,9 +30,11 @@ function BoutonRapport() {
     <button
       onClick={telecharger}
       disabled={loading}
-      className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all disabled:opacity-50">
-      <span className="text-[9px] font-bold tracking-widest text-emerald-400">
-        {loading ? "⏳ GÉNÉRATION..." : "⬇ RAPPORT 24H"}
+      className="flex items-center gap-2 px-4 py-1.5 rounded-lg border border-accent-blue/30 bg-accent-blue/10 hover:bg-accent-blue/20 transition-all disabled:opacity-50 group"
+    >
+      <FileDown size={14} className="text-accent-blue group-hover:scale-110 transition-transform" />
+      <span className="text-[11px] font-bold tracking-wide text-accent-blue">
+        {loading ? "GÉNÉRATION..." : "RAPPORT EXCEL"}
       </span>
     </button>
   );
@@ -39,30 +42,43 @@ function BoutonRapport() {
 
 export default function Topbar({ connected, pulse, lastUpdate, alertesCount, onToggleAlerts }) {
   return (
-    <header className="flex items-center justify-between px-5 h-14 bg-slate-950/95 border-b border-white/5 sticky top-0 z-40 backdrop-blur">
-      <div className="flex items-center gap-3">
-        <div className="w-7 h-7 bg-emerald-400 rounded flex items-center justify-center font-black text-[#060d1a] text-sm">O</div>
-        <span className="text-[13px] font-black text-emerald-400 tracking-[.15em] uppercase">
-          JFC3 — Acide Phosphorique
-        </span>
-      </div>
+    <header className="flex items-center justify-between px-6 h-[56px] bg-background-surface/80 border-b border-border-subtle sticky top-0 z-40 backdrop-blur-xl ml-16">
       <div className="flex items-center gap-4">
-        <BoutonRapport />
-        {/* Badge alertes */}
-        <AlertBadge
-          count={alertesCount}
-          onClick={onToggleAlerts}
-        />
-        <LivePill connected={connected} pulse={pulse} />
-        <span className="text-[10px] text-slate-400 tracking-wide hidden sm:block">
-          WebSocket: {connected ? "Connecté" : "Déconnecté"}
-        </span>
-        {lastUpdate && (
-          <span className="text-[10px] text-slate-500 hidden sm:block">
-            Màj: {lastUpdate.toLocaleTimeString("fr-MA")}
+        <div className="flex flex-col">
+          <span className="text-[14px] font-bold text-text-primary tracking-tight">
+            Dashboard Industriel
           </span>
-        )}
-        <Clock />
+          <span className="text-[10px] text-text-muted font-medium uppercase tracking-widest">
+            Atelier Acide Phosphorique — JFC3
+          </span>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-4 border-r border-border-subtle pr-6 mr-2">
+          <BoutonRapport />
+          <LivePill connected={connected} pulse={pulse} />
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {lastUpdate && (
+            <div className="hidden lg:flex flex-col items-end mr-2">
+              <span className="text-[9px] text-text-muted font-bold uppercase tracking-tighter">Dernière mise à jour</span>
+              <span className="text-[11px] font-mono text-text-secondary">
+                {lastUpdate.toLocaleTimeString("fr-MA")}
+              </span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-3 bg-background-base/50 p-1.5 rounded-xl border border-border-subtle">
+             <AlertBadge
+                count={alertesCount}
+                onClick={onToggleAlerts}
+              />
+              <div className="w-px h-4 bg-border-subtle mx-1" />
+              <Clock />
+          </div>
+        </div>
       </div>
     </header>
   );

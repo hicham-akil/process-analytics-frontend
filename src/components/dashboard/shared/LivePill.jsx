@@ -1,12 +1,19 @@
 export default function LivePill({ connected, pulse }) {
   return (
-    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10">
-      <span className={`w-1.5 h-1.5 rounded-full transition-opacity duration-300 ${
-        connected ? "bg-emerald-400" : "bg-red-400"
-      } ${pulse ? "opacity-100" : "opacity-20"}`} />
-      <span className="text-[9px] font-bold tracking-widest text-emerald-400">
-        {connected ? "DIRECT" : "HORS LIGNE"}
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all duration-300 ${
+      connected 
+        ? "border-accent-green/30 bg-accent-green/5 text-accent-green" 
+        : "border-accent-red/30 bg-accent-red/5 text-accent-red"
+    }`}>
+      <div className="relative flex items-center justify-center">
+        <div className={`w-2 h-2 rounded-full ${connected ? "bg-accent-green" : "bg-accent-red"} ${pulse ? "scale-125" : "scale-100"} transition-transform duration-300`} />
+        {connected && (
+          <div className="absolute inset-0 w-2 h-2 rounded-full bg-accent-green animate-ping opacity-40" />
+        )}
+      </div>
+      <span className="text-[10px] font-bold tracking-widest uppercase">
+        {connected ? "Système en direct" : "Hors ligne"}
       </span>
-    </span>
+    </div>
   );
 }

@@ -1,69 +1,80 @@
 import usePerteData from "../../hooks/usePerteData";
-import Topbar from "../dashboard/Topbar";
+import useJFC1Data from "../../hooks/useJFC1Data";
+import PerteTopbar from "./PerteTopbar";
 import Sidebar from "../dashboard/Sidebar";
 import PerteForm from "./PerteForm";
 import PerteHistory from "./PerteHistory";
+import { AlertPanel } from "../dashboard/AlertPanel";
+import { ClipboardEdit, History } from "lucide-react";
+import SectionHead from "../dashboard/shared/SectionHead";
 
 export default function PerteDashboard() {
-  // ✅ destructure refetch from the hook
   const { latest, history, connected, pulse, lastUpdate, refetch } = usePerteData();
+  
+  const { 
+    alertesNonAcquittees, 
+    showAlertPanel, 
+    setShowAlertPanel, 
+    acquitter 
+  } = useJFC1Data();
+
+  const toggleAlerts = () => setShowAlertPanel(v => !v);
 
   return (
-    <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
-      <Topbar
+    <div className="bg-background-base min-h-screen text-text-primary flex flex-col font-inter">
+      {showAlertPanel && (
+        <AlertPanel
+          alertes={alertesNonAcquittees}
+          onAcquitter={acquitter}
+          onClose={() => setShowAlertPanel(false)}
+        />
+      )}
+
+      <PerteTopbar
         connected={connected}
         pulse={pulse}
         lastUpdate={lastUpdate}
-        alertesCount={0}
-        onToggleAlerts={() => {}}
+        alertesCount={alertesNonAcquittees.length}
+        onToggleAlerts={toggleAlerts}
       />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
-          alertesCount={0}
+          alertesCount={alertesNonAcquittees.length}
           connected={connected}
-          onToggleAlerts={() => {}}
+          onToggleAlerts={toggleAlerts}
         />
 
-        <main className="flex-1 overflow-y-auto p-6 bg-[#060d1a]">
-          <div className="max-w-[1200px] mx-auto space-y-8">
-            <header>
-              <h1 className="text-2xl font-black tracking-tighter text-slate-100 uppercase italic">
-                Saisie &amp; Historique{" "}
-                <span className="text-emerald-400 text-3xl">Pertes Gypse</span>
+        <main className="flex-1 overflow-y-auto p-8 ml-16 bg-background-base">
+          <div className="max-w-7xl mx-auto space-y-10 animate-fade-slide-up">
+            <header className="flex flex-col gap-2">
+              <h1 className="text-3xl font-black tracking-tight text-text-primary uppercase">
+                Saisie & <span className="text-accent-green">Indicateurs Gypse</span>
               </h1>
-              <p className="text-slate-500 text-[10px] font-bold tracking-[.2em] uppercase mt-1">
-                Module de gestion manuelle des indicateurs de perte
+              <p className="text-text-muted text-xs font-bold tracking-[0.2em] uppercase">
+                Module de gestion manuelle des performances
               </p>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8">
-              <div className="space-y-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                      ◈ Formulaire de saisie
-                    </span>
-                    <div className="flex-1 h-px bg-white/5" />
-                  </div>
-                  {/* ✅ pass refetch as onSuccess so history reloads after save */}
-                  <PerteForm onSuccess={refetch} />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-10">
+              <section className="space-y-6">
+                <SectionHead icon={<ClipboardEdit size={16} />} label="Formulaire de saisie" />
+                <PerteForm onSuccess={refetch} />
+              </section>
 
-              <div className="space-y-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                      ◉ Historique des 50 derniers relevés
-                    </span>
-                    <div className="flex-1 h-px bg-white/5" />
-                  </div>
-                  {/* ✅ history is now always fresh after every submission */}
-                  <PerteHistory history={history} />
-                </div>
-              </div>
+              <section className="space-y-6">
+                <SectionHead icon={<History size={16} />} label="Historique des relevés" />
+                <PerteHistory history={history} />
+              </section>
             </div>
+            
+            <footer className="pt-12 pb-6 border-t border-border-subtle flex justify-between items-center text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span>© 2026 JFC3 Manual Control</span>
+              <div className="flex gap-6">
+                <span>Validation Labo requise</span>
+                <span>Enregistrement sécurisé</span>
+              </div>
+            </footer>
           </div>
         </main>
       </div>

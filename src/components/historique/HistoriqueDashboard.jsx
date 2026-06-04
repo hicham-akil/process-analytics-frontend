@@ -3,12 +3,17 @@ import {
   Tooltip, ResponsiveContainer, ReferenceLine
 } from "recharts";
 import useHistoriqueData from "../../hooks/useHistoriqueData";
+import useJFC1Data from "../../hooks/useJFC1Data";
 import { SEUILS } from "../../config/seuils";
 
 import HistoriqueTopbar from "./HistoriqueTopbar";
+import Sidebar from "../dashboard/Sidebar";
+import { AlertPanel } from "../dashboard/AlertPanel";
 import StatCard from "./StatCard";
 import HistoTooltip from "./HistoTooltip";
 import TableRow from "./TableRow";
+import SectionHead from "../dashboard/shared/SectionHead";
+import { Calendar, Search, History, BarChart3, Database, AlertCircle, Loader2 } from "lucide-react";
 
 const PRESETS = [
   { label: "1 h",  h: 1 },
@@ -25,6 +30,16 @@ export default function HistoriqueDashboard() {
     fetch, setPreset, stats,
   } = useHistoriqueData();
 
+  const { 
+    alertesNonAcquittees, 
+    showAlertPanel, 
+    setShowAlertPanel, 
+    acquitter,
+    connected
+  } = useJFC1Data();
+
+  const toggleAlerts = () => setShowAlertPanel(v => !v);
+
   // Prepare chart data (last 60 points max, chronological order)
   const chartData = [...data]
     .slice(0, 60)
@@ -38,194 +53,225 @@ export default function HistoriqueDashboard() {
     }));
 
   return (
-    <div className="bg-[#060d1a] min-h-screen text-slate-100 font-mono flex flex-col">
-      <HistoriqueTopbar />
+    <div className="bg-background-base min-h-screen text-text-primary flex flex-col font-inter">
+      {showAlertPanel && (
+        <AlertPanel
+          alertes={alertesNonAcquittees}
+          onAcquitter={acquitter}
+          onClose={() => setShowAlertPanel(false)}
+        />
+      )}
 
-      <main className="flex-1 overflow-y-auto p-5 space-y-5 max-w-[1400px] w-full mx-auto">
+      <HistoriqueTopbar 
+        alertesCount={alertesNonAcquittees.length}
+        onToggleAlerts={toggleAlerts}
+      />
 
-        {/* ── Barre de filtres ── */}
-        <div className="rounded-xl bg-slate-900/80 border border-white/5 p-5">
-          <p className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500 mb-4">
-            ◷ Filtres de période
-          </p>
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar
+          alertesCount={alertesNonAcquittees.length}
+          connected={connected}
+          onToggleAlerts={toggleAlerts}
+        />
 
-          {/* Presets */}
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {PRESETS.map(p => (
-              <button
-                key={p.h}
-                onClick={() => setPreset(p.h)}
-                className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800 hover:bg-slate-700 hover:border-violet-500/40 text-slate-400 hover:text-violet-300 transition-all"
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+        <main className="flex-1 overflow-y-auto p-8 ml-16 bg-background-base">
+          <div className="max-w-7xl mx-auto space-y-8 animate-fade-slide-up">
 
-          {/* Date pickers + bouton */}
-          <div className="flex gap-3 items-end flex-wrap">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500">Début</label>
-              <input
-                type="datetime-local"
-                value={debut}
-                onChange={e => setDebut(e.target.value)}
-                className="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-[11px] text-slate-200 font-mono focus:outline-none focus:border-violet-500/60 transition-colors"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-bold tracking-[.1em] uppercase text-slate-500">Fin</label>
-              <input
-                type="datetime-local"
-                value={fin}
-                onChange={e => setFin(e.target.value)}
-                className="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-[11px] text-slate-200 font-mono focus:outline-none focus:border-violet-500/60 transition-colors"
-              />
-            </div>
-            <button
-              onClick={fetch}
-              disabled={loading}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[10px] font-bold tracking-[.08em] uppercase hover:bg-violet-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {loading ? (
-                <span className="animate-spin inline-block w-3 h-3 border-2 border-violet-400 border-t-transparent rounded-full" />
-              ) : "◎"}
-              {loading ? "Chargement..." : "Rechercher"}
-            </button>
-          </div>
+            {/* ── Barre de filtres ── */}
+            <section className="rounded-xl bg-background-cards border border-border-subtle p-6 shadow-lg">
+              <SectionHead icon={<Calendar size={16} />} label="Filtres de période" />
 
-          {error && (
-            <p className="mt-3 text-[10px] text-red-400 font-bold">⚠ {error}</p>
-          )}
-        </div>
+              <div className="flex flex-col md:flex-row gap-6 mt-6">
+                {/* Presets */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Raccourcis</span>
+                  <div className="flex gap-2 flex-wrap">
+                    {PRESETS.map(p => (
+                      <button
+                        key={p.h}
+                        onClick={() => setPreset(p.h)}
+                        className="text-[11px] font-bold px-4 py-2 rounded-lg border border-border-subtle bg-background-base hover:border-accent-blue/50 hover:text-accent-blue transition-all"
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-        {/* ── Résultats ── */}
-        {searched && !loading && (
-          <>
-            {data.length === 0 ? (
-              <div className="flex items-center justify-center h-40 text-slate-600 text-sm">
-                Aucune donnée sur cette période
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Début</label>
+                    <input
+                      type="datetime-local"
+                      value={debut}
+                      onChange={e => setDebut(e.target.value)}
+                      className="bg-background-base border border-border-subtle rounded-lg px-4 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent-blue/50 transition-colors"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Fin</label>
+                    <input
+                      type="datetime-local"
+                      value={fin}
+                      onChange={e => setFin(e.target.value)}
+                      className="bg-background-base border border-border-subtle rounded-lg px-4 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent-blue/50 transition-colors"
+                    />
+                  </div>
+                  <button
+                    onClick={fetch}
+                    disabled={loading}
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-xs font-bold uppercase tracking-widest hover:bg-accent-blue/20 disabled:opacity-50 transition-all"
+                  >
+                    {loading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : <Search size={16} />}
+                    {loading ? "Chargement..." : "Rechercher"}
+                  </button>
+                </div>
               </div>
-            ) : (
+
+              {error && (
+                <div className="mt-4 p-3 rounded-lg bg-accent-red/10 border border-accent-red/20 flex items-center gap-2 text-accent-red text-xs font-bold">
+                  <AlertCircle size={14} />
+                  <span>{error}</span>
+                </div>
+              )}
+            </section>
+
+            {/* ── Résultats ── */}
+            {searched && !loading && (
               <>
-                {/* ── Compteur résultats ── */}
-                <div className="flex items-center gap-3">
-                  <span className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                    ◈ {data.length} relevé{data.length > 1 ? "s" : ""} trouvé{data.length > 1 ? "s" : ""}
-                  </span>
-                  {stats?.alertRate > 0 && (
-                    <span className="text-[9px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                      ⚠ {stats.alertRate} hors seuil
-                    </span>
-                  )}
-                  <div className="flex-1 h-px bg-white/5" />
-                </div>
-
-                {/* ── Cartes stats ── */}
-                {stats && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <StatCard label="RC moy."     s={stats.rc}         unit=""    isMin        seuil={SEUILS.rc.min} />
-                    <StatCard label="RI moy."     s={stats.ri}         unit=""    isMin        seuil={SEUILS.ri.min} />
-                    <StatCard label="CAP moy."    s={stats.cap}        unit=""    isMin={false} seuil={999} />
-                    <StatCard label="H₂SO₄ moy."  s={stats.consoH2so4} unit="T/T" isMin={false} seuil={SEUILS.consoH2so4?.max ?? 3.8} />
+                {data.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-text-muted bg-background-cards border border-border-subtle rounded-xl border-dashed">
+                    <History size={48} className="opacity-10 mb-4" />
+                    <p className="text-sm font-medium">Aucune donnée sur cette période</p>
                   </div>
-                )}
-
-                {/* ── Graphique RC / RI / CAP / H2SO4 ── */}
-                <div className="rounded-xl bg-slate-900/80 border border-white/5 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                      ◉ Évolution sur la période
-                    </p>
-                    <div className="flex gap-4 text-[9px] text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <span className="inline-block w-4 h-0.5 bg-emerald-400 rounded" />RC
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="inline-block w-4 h-0.5 bg-sky-400 rounded" />RI
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="inline-block w-4 h-0.5 bg-violet-400 rounded" />CAP
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="inline-block w-4 h-0.5 bg-amber-400 rounded" />H₂SO₄
-                      </span>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <SectionHead icon={<History size={16} />} label={`${data.length} relevés trouvés`} />
+                        {stats?.alertRate > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent-amber/10 border border-accent-amber/20 text-accent-amber uppercase tracking-wider">
+                            {stats.alertRate} hors seuil
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                      <CartesianGrid stroke="rgba(255,255,255,.04)" vertical={false} />
-                      <XAxis
-                        dataKey="time"
-                        tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval="preserveStartEnd"
-                      />
-                      <YAxis
-                        domain={["auto", "auto"]}
-                        tick={{ fill: "#3d5a78", fontSize: 9, fontFamily: "monospace" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip content={<HistoTooltip />} />
-                      <ReferenceLine y={SEUILS.rc.min} stroke="rgba(52,211,153,.15)"  strokeDasharray="4 3" />
-                      <ReferenceLine y={SEUILS.ri.min} stroke="rgba(56,189,248,.15)"  strokeDasharray="4 3" />
-                      <Line type="monotone" dataKey="rc"    name="RC"    stroke="#34d399" strokeWidth={2}   dot={false} connectNulls />
-                      <Line type="monotone" dataKey="ri"    name="RI"    stroke="#38bdf8" strokeWidth={2}   dot={false} connectNulls />
-                      <Line type="monotone" dataKey="cap"   name="CAP"   stroke="#a78bfa" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="4 3" />
-                      <Line type="monotone" dataKey="h2so4" name="H₂SO₄" stroke="#fbbf24" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="2 2" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
 
-                {/* ── Tableau détaillé ── */}
-                <div className="rounded-xl bg-slate-900/80 border border-white/5 overflow-hidden">
-                  <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-                    <p className="text-[9px] font-bold tracking-[.15em] uppercase text-slate-500">
-                      ▣ Données détaillées
-                    </p>
-                    <span className="text-[9px] text-slate-600">
-                      {data.length > 100 ? `100 / ${data.length} affichés` : `${data.length} relevés`}
-                    </span>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[900px]">
-                      <thead>
-                        <tr className="bg-slate-950/50">
-                          {["Horodatage", "RC", "RI", "CAP", "H₂SO₄", "Eau Brute", "Phosphates", "Statut"].map(h => (
-                            <th
-                              key={h}
-                              className="px-3 py-2.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/5 text-center first:text-left"
-                            >
-                              {h}
-                            </th>
+                    {/* ── Cartes stats ── */}
+                    {stats && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <StatCard label="RC moy."     s={stats.rc}         unit=""    isMin        seuil={SEUILS.rc.min} />
+                        <StatCard label="RI moy."     s={stats.ri}         unit=""    isMin        seuil={SEUILS.ri.min} />
+                        <StatCard label="CAP moy."    s={stats.cap}        unit=""    isMin={false} seuil={999} />
+                        <StatCard label="H₂SO₄ moy."  s={stats.consoH2so4} unit="T/T" isMin={false} seuil={SEUILS.consoH2so4?.max ?? 3.8} />
+                      </div>
+                    )}
+
+                    {/* ── Graphique ── */}
+                    <section className="rounded-xl bg-background-cards border border-border-subtle p-6 shadow-lg">
+                      <div className="flex items-center justify-between mb-8">
+                        <SectionHead icon={<BarChart3 size={16} />} label="Tendance sur la période" />
+                        <div className="flex gap-4">
+                          {[
+                            { color: "bg-accent-green", label: "RC" },
+                            { color: "bg-accent-blue",  label: "RI" },
+                            { color: "bg-accent-cyan",  label: "CAP" },
+                            { color: "bg-accent-amber", label: "H₂SO₄" },
+                          ].map(d => (
+                            <div key={d.label} className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${d.color}`} />
+                              <span className="text-[10px] font-bold text-text-muted uppercase">{d.label}</span>
+                            </div>
                           ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.slice(0, 100).map((row, i) => (
-                          <TableRow key={row.id ?? i} row={row} index={i} />
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                        </div>
+                      </div>
+
+                      <div className="h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
+                            <CartesianGrid stroke="rgba(255,255,255,0.03)" vertical={false} />
+                            <XAxis
+                              dataKey="time"
+                              tick={{ fill: "#475569", fontSize: 10, fontFamily: "JetBrains Mono" }}
+                              axisLine={false}
+                              tickLine={false}
+                              interval="preserveStartEnd"
+                            />
+                            <YAxis
+                              domain={["auto", "auto"]}
+                              tick={{ fill: "#475569", fontSize: 10, fontFamily: "JetBrains Mono" }}
+                              axisLine={false}
+                              tickLine={false}
+                            />
+                            <Tooltip content={<HistoTooltip />} />
+                            <ReferenceLine y={SEUILS.rc.min} stroke="rgba(16,185,129,0.1)" strokeDasharray="4 4" />
+                            <ReferenceLine y={SEUILS.ri.min} stroke="rgba(59,130,246,0.1)" strokeDasharray="4 4" />
+                            <Line type="monotone" dataKey="rc"    stroke="#10b981" strokeWidth={2.5} dot={false} connectNulls />
+                            <Line type="monotone" dataKey="ri"    stroke="#3b82f6" strokeWidth={2.5} dot={false} connectNulls />
+                            <Line type="monotone" dataKey="cap"   stroke="#06b6d4" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="5 5" />
+                            <Line type="monotone" dataKey="h2so4" stroke="#f59e0b" strokeWidth={1.5} dot={false} connectNulls strokeDasharray="3 3" />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </section>
+
+                    {/* ── Tableau détaillé ── */}
+                    <section className="rounded-xl bg-background-cards border border-border-subtle shadow-lg overflow-hidden">
+                      <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
+                        <SectionHead icon={<Database size={16} />} label="Données détaillées" />
+                        <span className="text-[10px] font-bold text-text-muted uppercase">
+                          {data.length > 100 ? `Affichage 100 / ${data.length}` : `${data.length} relevés`}
+                        </span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[1000px]">
+                          <thead>
+                            <tr className="bg-background-base/50">
+                              {["Horodatage", "RC", "RI", "CAP", "H₂SO₄", "Eau Brute", "Phosphates", "Statut"].map(h => (
+                                <th key={h} className="px-4 py-3 text-[10px] font-bold text-text-muted uppercase tracking-widest border-b border-border-subtle text-center first:text-left">
+                                  {h}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border-subtle">
+                            {data.slice(0, 100).map((row, i) => (
+                              <TableRow key={row.id ?? i} row={row} index={i} />
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </>
+                )}
               </>
             )}
-          </>
-        )}
 
-        {/* ── État initial ── */}
-        {!searched && !loading && (
-          <div className="flex flex-col items-center justify-center h-64 text-center gap-3">
-            <div className="text-5xl opacity-10 text-violet-400">◷</div>
-            <p className="text-slate-600 text-sm">Sélectionnez une période puis cliquez sur Rechercher</p>
-            <p className="text-slate-700 text-[10px]">Données disponibles depuis la mise en service du système</p>
+            {/* ── État initial ── */}
+            {!searched && !loading && (
+              <div className="flex flex-col items-center justify-center py-32 text-center gap-4 bg-background-cards border border-border-subtle rounded-xl border-dashed">
+                <div className="p-4 rounded-full bg-accent-blue/5 text-accent-blue opacity-20">
+                  <History size={64} />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-text-primary">Consultation de l'historique</p>
+                  <p className="text-sm text-text-muted mt-1">Sélectionnez une période pour commencer l'analyse</p>
+                </div>
+              </div>
+            )}
+
+            <footer className="pt-12 pb-6 border-t border-border-subtle flex justify-between items-center text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span>© 2026 JFC3 Data Archiving</span>
+              <div className="flex gap-6">
+                <span>Intégrité des données</span>
+                <span>Audit continu</span>
+              </div>
+            </footer>
           </div>
-        )}
-
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

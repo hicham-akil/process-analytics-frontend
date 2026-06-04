@@ -1,13 +1,25 @@
 export default function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-950 border border-white/10 rounded-lg p-3 text-xs font-mono">
-      <p className="text-slate-400 mb-1">{label}</p>
-      {payload.map((p) => (
-        <p key={p.name} style={{ color: p.color }}>
-          {p.name === "cap" ? "CAP" : "Cible"}: {Number(p.value).toFixed(4)}
-        </p>
-      ))}
+    <div className="bg-background-surface/90 backdrop-blur-md border border-border-medium rounded-xl p-3 shadow-2xl animate-fade-slide-up">
+      <div className="border-b border-border-subtle pb-1 mb-2">
+        <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{label}</p>
+      </div>
+      <div className="space-y-1.5">
+        {payload.map((p) => (
+          <div key={p.name} className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.color }} />
+              <span className="text-[11px] font-bold text-text-secondary uppercase">
+                {p.name === "cap" ? "CAP Réel" : p.name === "target" ? "Cible" : p.name}
+              </span>
+            </div>
+            <span className="text-[12px] font-mono font-bold text-text-primary">
+              {Number(p.value).toFixed(4)}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

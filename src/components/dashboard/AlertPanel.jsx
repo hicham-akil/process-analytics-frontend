@@ -1,76 +1,121 @@
 import { useState, useEffect } from "react";
+import { Bell, X, AlertTriangle, Check, Info } from "lucide-react";
 
 function AlertPanel({ alertes, onAcquitter, onClose }) {
   return (
-    <div className="fixed top-16 right-4 z-50 w-80 bg-slate-900 border border-red-500/30 rounded-xl shadow-2xl shadow-red-500/10 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-red-500/10">
-        <span className="text-[10px] font-bold tracking-widest uppercase text-red-400">
-          ⚠ Alertes Actives ({alertes.length})
-        </span>
-        <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-sm">✕</button>
-      </div>
-      <div className="max-h-96 overflow-y-auto">
-        {alertes.length === 0 ? (
-          <div className="p-4 text-center text-slate-600 text-xs">Aucune alerte active</div>
-        ) : (
-          alertes.map((a) => (
-            <div key={a.id}
-              className={`p-3 border-b border-white/5 ${
-                a.severite === "CRITICAL" ? "bg-red-500/5" : "bg-amber-500/5"
-              }`}>
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                      a.severite === "CRITICAL"
-                        ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                    }`}>
-                      {a.severite === "CRITICAL" ? "CRITIQUE" : a.severite}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-200">
-                      {a.typeIndicateur}
-                    </span>
-                  </div>
-                  <p className="text-[9px] text-slate-400">
-                    Valeur: <span className="text-slate-200 font-mono">{a.valeur}</span>
-                    {" "}/ Seuil: <span className="text-slate-200 font-mono">{a.seuil}</span>
-                  </p>
-                  <p className="text-[9px] text-slate-600 mt-0.5">
-                    {new Date(a.date).toLocaleTimeString("fr-MA")}
-                  </p>
-                </div>
-                <button
-                  onClick={() => onAcquitter(a.id)}
-                  className="text-[9px] font-bold px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors shrink-0">
-                  ACK
-                </button>
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-background-base/60 backdrop-blur-sm z-[60]"
+        onClick={onClose}
+      />
+      
+      {/* Panel */}
+      <div className="fixed top-0 right-0 h-full w-[360px] bg-background-surface border-l border-border-medium z-[70] shadow-2xl flex flex-col animate-fade-slide-up">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-background-cards/50">
+          <div className="flex items-center gap-2">
+            <Bell size={18} className="text-accent-red" />
+            <h3 className="text-sm font-bold text-text-primary tracking-tight">
+              Alertes Actives ({alertes.length})
+            </h3>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-text-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {alertes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-accent-green/10 flex items-center justify-center">
+                <Check size={24} className="text-accent-green" />
               </div>
+              <p className="text-sm text-text-muted">Système stable. Aucune alerte.</p>
             </div>
-          ))
+          ) : (
+            alertes.map((a) => (
+              <div key={a.id}
+                className={`relative overflow-hidden p-4 rounded-xl border border-border-subtle transition-all hover:border-border-medium ${
+                  a.severite === "CRITICAL" ? "bg-accent-red/5 border-l-4 border-l-accent-red" : "bg-accent-amber/5 border-l-4 border-l-accent-amber"
+                }`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                        a.severite === "CRITICAL"
+                          ? "bg-accent-red/20 text-accent-red"
+                          : "bg-accent-amber/20 text-accent-amber"
+                      }`}>
+                        {a.severite === "CRITICAL" ? "Critique" : a.severite}
+                      </span>
+                      <span className="text-xs font-bold text-text-primary">
+                        {a.typeIndicateur}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                         <span className="text-[11px] text-text-muted">Valeur:</span>
+                         <span className="text-[11px] font-mono font-bold text-text-primary">{a.valeur}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                         <span className="text-[11px] text-text-muted">Seuil:</span>
+                         <span className="text-[11px] font-mono text-text-secondary">{a.seuil}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-text-muted flex items-center gap-1">
+                      <Info size={10} />
+                      Détecté à {new Date(a.date).toLocaleTimeString("fr-MA")}
+                    </p>
+                  </div>
+                  
+                  <button
+                    onClick={() => onAcquitter(a.id)}
+                    className="p-2 rounded-lg bg-background-cards border border-border-subtle hover:border-accent-green/50 hover:text-accent-green transition-all group shrink-0"
+                    title="Acquitter"
+                  >
+                    <Check size={16} />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {alertes.length > 0 && (
+          <div className="p-4 border-t border-border-subtle bg-background-cards/30">
+            <button 
+              className="w-full py-2.5 rounded-lg bg-background-cards border border-border-subtle text-xs font-bold text-text-secondary hover:text-text-primary hover:bg-white/5 transition-all"
+              onClick={onClose}
+            >
+              Fermer le panneau
+            </button>
+          </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
 
 function AlertBadge({ count, onClick }) {
-  const [blink, setBlink] = useState(true);
-  useEffect(() => {
-    if (count === 0) return;
-    const id = setInterval(() => setBlink(v => !v), 800);
-    return () => clearInterval(id);
-  }, [count]);
-
   if (count === 0) return null;
+  
   return (
-    <button onClick={onClick}
-      className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all ${
-        blink
-          ? "border-red-500/60 bg-red-500/20 text-red-400"
-          : "border-red-500/20 bg-red-500/5 text-red-500"
-      }`}>
-      <span className="text-[9px] font-bold tracking-widest">⚠ {count} ALERTE{count > 1 ? "S" : ""}</span>
+    <button 
+      onClick={onClick}
+      className="relative flex items-center gap-2 px-3 py-1.5 rounded-lg border border-accent-red/30 bg-accent-red/10 text-accent-red transition-all hover:bg-accent-red/20 group"
+    >
+      <div className="relative">
+        <AlertTriangle size={14} className="animate-pulse" />
+        <span className="absolute -top-2 -right-2 w-full h-full bg-accent-red/20 rounded-full animate-pulse-ring pointer-events-none" />
+      </div>
+      <span className="text-[11px] font-bold tracking-tight">
+        {count} ALERTE{count > 1 ? "S" : ""}
+      </span>
     </button>
   );
 }
