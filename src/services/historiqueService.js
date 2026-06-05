@@ -42,11 +42,13 @@ export async function fetchHistorique(debut, fin) {
 export async function fetchComparaison(debut1, fin1, debut2, fin2) {
   const res = await axios.get(`${API_BASE}/indicateurs/comparaison`, {
     params: {
-      debut1: toApiIso(debut1),
-      fin1:   toApiIso(fin1),
+      debut1: toApiIso(debut1),  
+      fin1: toApiIso(fin1),
       debut2: toApiIso(debut2),
-      fin2:   toApiIso(fin2),
+      fin2: toApiIso(fin2),
     },
   });
+  console.log("Comparaison API response:", res.data);
   return res.data;
 }
+

@@ -58,12 +58,65 @@ export default function HistoriqueDashboard() {
     connected
   } = useJFC1Data();
 
+  // ✅ APRÈS
   const handleCompare = useCallback(async () => {
     setCompLoading(true);
     setCompError(null);
     try {
       const res = await fetchComparaison(debut1, fin1, debut2, fin2);
-      setCompData(res);
+
+      // ── Transformer la réponse brute en format attendu par les composants ──
+
+      const { periode1, periode2, delta } = res;
+
+      // Construire les séries pour ComparaisonChart (alignement par index)
+      const buildSerie = (key) => {
+        const maxLen = Math.max(periode1.points.length, periode2.points.length);
+        const result = [];
+        for (let i = 0; i < maxLen; i++) {
+          const p1 = periode1.points[i];
+          const p2 = periode2.points[i];
+          result.push({
+            offset: i + 1,
+            v1: p1?.[key] ?? null,
+            v2: p2?.[key] ?? null,
+          });
+        }
+        return result;
+      };
+
+      // Construire les stats plates pour ComparaisonStatsTable
+      const flatStats = (stats) => ({
+        rc: stats?.rc?.avg ?? 0,
+        ri: stats?.ri?.avg ?? 0,
+        cap: stats?.cap?.avg ?? 0,
+        h2so4: stats?.consoH2so4?.avg ?? 0,
+        eau: stats?.consoEauBrute?.avg ?? 0,
+        phosphate: stats?.consoPhosphates?.avg ?? 0,
+        vapeur: stats?.consoVapeur?.avg ?? 0,
+      });
+
+      const transformed = {
+        // Pour ComparaisonChart
+        chartData: {
+          rc: buildSerie("rc"),
+          ri: buildSerie("ri"),
+          cap: buildSerie("cap"),
+          h2so4: buildSerie("consoH2so4"),
+        },
+        // Pour ComparaisonStatsTable
+        statsP1: flatStats(periode1.stats),
+        statsP2: flatStats(periode2.stats),
+        // Labels affichés dans les graphiques
+        p1Label: `${new Date(periode1.debut).toLocaleDateString("fr-MA")} → ${new Date(periode1.fin).toLocaleDateString("fr-MA")}`,
+        p2Label: `${new Date(periode2.debut).toLocaleDateString("fr-MA")} → ${new Date(periode2.fin).toLocaleDateString("fr-MA")}`,
+        // Alertes
+        alertPeriode1: res.alertPeriode1,
+        alertPeriode2: res.alertPeriode2,
+        delta,
+      };
+
+      setCompData(transformed);
       setCompSearched(true);
     } catch (e) {
       setCompError(e.response?.data?.erreur || "Erreur lors de la comparaison");

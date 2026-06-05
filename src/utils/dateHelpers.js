@@ -29,7 +29,7 @@ export function defaultFin() {
  * @returns {string}
  */
 export function toApiIso(localDatetime) {
-  return new Date(localDatetime).toISOString().replace("Z", "");
+  return new Date(localDatetime).toISOString().split(".")[0];
 }
 
 /**
