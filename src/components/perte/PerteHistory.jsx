@@ -52,6 +52,13 @@ export default function PerteHistory({ history, onDelete }) {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Confirmer la suppression de cet enregistrement ?")) return;
+    console.log("Delete ID:", id);
+
+    if (!id) {
+      console.error("ID is undefined");
+      return;
+    }
+
     try {
       setError(null);
       await deletePerte(id);

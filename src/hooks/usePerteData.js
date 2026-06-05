@@ -19,6 +19,7 @@ export default function usePerteData() {
   }, []);
 
   const formatPoint = (data) => ({
+    id: data.id,
     time: data.date
       ? new Date(data.date).toLocaleTimeString()
       : new Date().toLocaleTimeString(),
