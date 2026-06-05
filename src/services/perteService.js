@@ -15,3 +15,8 @@ export async function fetchHistoriquePerte() {
   const res = await axios.get(`${API_BASE}/ingest/perte/historique`);
   return res.data;
 }
+
+export async function deletePerte(id) {
+  const res = await axios.delete(`${API_BASE}/ingest/perte/${id}`);
+  return res.data;
+}

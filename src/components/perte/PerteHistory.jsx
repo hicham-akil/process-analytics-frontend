@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { fmt, getNiveau, couleurNiveau } from "../../config/seuils";
-import { ClockIcon, DatabaseIcon, Calendar } from "lucide-react";
+import { ClockIcon, DatabaseIcon, Calendar, Trash2, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { deletePerte } from "../../services/perteService";
 
 const COLUMNS = [
   { key: "se",     label: "SE",  unit: "%" },
@@ -11,7 +14,6 @@ function NiveauBadge({ metricKey, value }) {
   const niveau  = getNiveau(metricKey, value);
   const colorClass = couleurNiveau(niveau);
 
-  // Map the color class to a pill style
   const pillMap = {
     "text-accent-red font-semibold": "bg-accent-red/10 text-accent-red border-accent-red/20",
     "text-accent-amber":            "bg-accent-amber/10 text-accent-amber border-accent-amber/20",
@@ -30,7 +32,10 @@ function NiveauBadge({ metricKey, value }) {
   );
 }
 
-export default function PerteHistory({ history }) {
+export default function PerteHistory({ history, onDelete }) {
+  const { isLabo } = useAuth();
+  const [error, setError] = useState(null);
+
   if (!history || history.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-border-subtle bg-background-cards px-6 py-20 text-center animate-fade-slide-up">
@@ -45,13 +50,23 @@ export default function PerteHistory({ history }) {
     );
   }
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Confirmer la suppression de cet enregistrement ?")) return;
+    try {
+      setError(null);
+      await deletePerte(id);
+      if (onDelete) onDelete();
+    } catch (err) {
+      setError("Erreur lors de la suppression. Veuillez réessayer.");
+    }
+  };
+
   const sortedHistory = [...history].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   );
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border-subtle bg-background-cards shadow-xl animate-fade-slide-up">
-
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border-subtle px-6 py-5 bg-background-surface/30">
         <div className="flex items-center gap-4">
@@ -72,6 +87,13 @@ export default function PerteHistory({ history }) {
         </span>
       </div>
 
+      {error && (
+        <div className="mx-6 mt-4 p-3 rounded-xl bg-accent-red/10 border border-accent-red/20 flex items-center gap-2 text-accent-red text-[11px] font-bold">
+          <AlertCircle size={14} />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[600px] border-collapse text-left">
@@ -88,13 +110,18 @@ export default function PerteHistory({ history }) {
                   {col.label}
                 </th>
               ))}
+              {isLabo && (
+                <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-text-muted border-b border-border-subtle">
+                  Action
+                </th>
+              )}
             </tr>
           </thead>
 
           <tbody className="divide-y divide-border-subtle/30">
             {sortedHistory.map((row, i) => (
               <tr
-                key={i}
+                key={row.id || i}
                 className="group transition-colors hover:bg-white/5"
               >
                 {/* Date */}
@@ -125,6 +152,19 @@ export default function PerteHistory({ history }) {
                     <NiveauBadge metricKey={col.key} value={row[col.key]} />
                   </td>
                 ))}
+
+                {/* Delete Action */}
+                {isLabo && (
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => handleDelete(row.id)}
+                      className="p-2 rounded-lg bg-accent-red/10 text-accent-red hover:bg-accent-red/20 transition-all border border-accent-red/20"
+                      title="Supprimer l'analyse"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

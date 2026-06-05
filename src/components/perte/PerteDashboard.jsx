@@ -70,7 +70,7 @@ export default function PerteDashboard() {
 
               <section className="space-y-6">
                 <SectionHead icon={<History size={16} />} label="Historique des relevés" />
-                <PerteHistory history={history} />
+                <PerteHistory history={history} onDelete={refetch} />
               </section>
             </div>
             

@@ -29,3 +29,24 @@ export async function fetchHistorique(debut, fin) {
 
   return sorted;
 }
+
+/**
+ * Récupère les données comparatives entre deux périodes.
+ * 
+ * @param {string} debut1 - Période 1 début
+ * @param {string} fin1   - Période 1 fin
+ * @param {string} debut2 - Période 2 début
+ * @param {string} fin2   - Période 2 fin
+ * @returns {Promise<Object>} Objet contenant les listes de points et les stats pour chaque période
+ */
+export async function fetchComparaison(debut1, fin1, debut2, fin2) {
+  const res = await axios.get(`${API_BASE}/indicateurs/comparaison`, {
+    params: {
+      debut1: toApiIso(debut1),
+      fin1:   toApiIso(fin1),
+      debut2: toApiIso(debut2),
+      fin2:   toApiIso(fin2),
+    },
+  });
+  return res.data;
+}
