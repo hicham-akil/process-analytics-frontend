@@ -1,10 +1,11 @@
-import { SEUILS, fmt } from "../../config/seuils";
+import { fmt } from "../../config/seuils";
+import { useSeuils } from "../../context/SeuilsContext";
 import { Wind, Zap, RefreshCw } from "lucide-react";
 
-const GYPSE_CONFIG = [
-  { key: "se",     label: "SE",  fullLabel: "Perte Séchage & Évaporation", seuil: SEUILS.se.max,     unit: "%", icon: Wind },
-  { key: "syn",    label: "SYN", fullLabel: "Perte Synthèse",              seuil: SEUILS.syn.max,    unit: "%", icon: Zap },
-  { key: "intVal", label: "INT", fullLabel: "Perte Intermédiaire",         seuil: SEUILS.intVal.max, unit: "%", icon: RefreshCw },
+const buildGypseConfig = (seuils) => [
+  { key: "se",     label: "SE",  fullLabel: "Perte Sechage & Evaporation", seuil: seuils.se.max,     unit: "%", icon: Wind },
+  { key: "syn",    label: "SYN", fullLabel: "Perte Synthese",              seuil: seuils.syn.max,    unit: "%", icon: Zap },
+  { key: "intVal", label: "INT", fullLabel: "Perte Intermediaire",         seuil: seuils.intVal.max, unit: "%", icon: RefreshCw },
 ];
 
 function GypseKPICard({ config, value }) {
@@ -14,11 +15,10 @@ function GypseKPICard({ config, value }) {
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-background-cards border border-border-subtle p-5 shadow-lg transition-all hover:border-border-medium group animate-fade-slide-up">
-      {/* Top border status indicator */}
       <div className={`absolute top-0 left-0 w-full h-[2px] ${
         isAlert ? "bg-accent-red shadow-[0_2px_10px_rgba(239,68,68,0.3)]" : "bg-accent-cyan shadow-[0_2px_10px_rgba(6,182,212,0.3)]"
       }`} />
-      
+
       <div className="flex items-start justify-between mb-4">
         <div className={`p-2 rounded-lg ${isAlert ? "bg-accent-red/10 text-accent-red" : "bg-accent-cyan/10 text-accent-cyan"}`}>
           <Icon size={18} />
@@ -34,7 +34,7 @@ function GypseKPICard({ config, value }) {
         <span className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-1">{config.fullLabel}</span>
         <div className="flex items-baseline gap-1">
           <span className={`text-4xl font-bold font-mono tracking-tighter ${isAlert ? "text-accent-red" : "text-text-primary"}`}>
-            {value != null ? fmt(value) : "—"}
+            {value != null ? fmt(value) : "-"}
           </span>
           <span className="text-text-muted text-lg font-medium">{config.unit}</span>
         </div>
@@ -46,7 +46,7 @@ function GypseKPICard({ config, value }) {
           <span>{progress.toFixed(1)}%</span>
         </div>
         <div className="h-1.5 w-full bg-background-base rounded-full overflow-hidden">
-          <div 
+          <div
             className={`h-full transition-all duration-1000 ease-out ${isAlert ? "bg-accent-red" : "bg-accent-cyan"}`}
             style={{ width: `${progress}%` }}
           />
@@ -61,10 +61,13 @@ function GypseKPICard({ config, value }) {
 }
 
 export default function GypseKPICards({ data }) {
+  const { seuils } = useSeuils();
+
   if (!data) return null;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {GYPSE_CONFIG.map(config => (
+      {buildGypseConfig(seuils).map(config => (
         <GypseKPICard
           key={config.label}
           config={config}

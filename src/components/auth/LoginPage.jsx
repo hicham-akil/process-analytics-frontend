@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { loginApi } from "../../services/authService";
-import { ShieldCheck, User, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { ShieldCheck, User, Lock, ArrowRight, Loader2, AlertTriangle } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();

@@ -1,9 +1,7 @@
-  
 export const API_BASE = "/api";
 export const WS_URL = "/api/ws-jfc1";
 
-
-export const SEUILS_NIVEAUX = {
+export const DEFAULT_SEUILS_NIVEAUX = {
   se:              { type: "max", warning: 0.60,  critique: 0.90  },
   syn:             { type: "max", warning: 0.78,  critique: 0.86  },
   intVal:          { type: "max", warning: 0.21,  critique: 0.23  },
@@ -20,20 +18,38 @@ export const SEUILS_NIVEAUX = {
   caOPhosphate:    { type: "min", warning: null,  critique: 39.0  },
 };
 
-// Seuils simples (pour compatibilité / affichage rapide)
-export const SEUILS = Object.fromEntries(
-  Object.entries(SEUILS_NIVEAUX).map(([key, { type, critique }]) => [
-    key,
-    type === "max" ? { max: critique } : { min: critique },
-  ])
-);
+export const SEUILS_NIVEAUX = DEFAULT_SEUILS_NIVEAUX;
 
-/**
- * Retourne null | "warning" | "critique"
- */
-export const getNiveau = (key, value) => {
+export const buildSimpleSeuils = (seuilsNiveaux = DEFAULT_SEUILS_NIVEAUX) =>
+  Object.fromEntries(
+    Object.entries(seuilsNiveaux).map(([key, { type, critique }]) => [
+      key,
+      type === "max" ? { max: critique } : { min: critique },
+    ])
+  );
+
+export const seuilsListToNiveaux = (items = []) => {
+  if (!Array.isArray(items) || items.length === 0) return DEFAULT_SEUILS_NIVEAUX;
+
+  return items.reduce((acc, item) => {
+    if (!item?.code) return acc;
+    acc[item.code] = {
+      type: String(item.type || "MAX").toLowerCase(),
+      warning: item.warning ?? null,
+      critique: item.critique,
+      label: item.label,
+      updatedAt: item.updatedAt,
+    };
+    return acc;
+  }, { ...DEFAULT_SEUILS_NIVEAUX });
+};
+
+// Simple thresholds kept for backwards compatibility.
+export const SEUILS = buildSimpleSeuils(DEFAULT_SEUILS_NIVEAUX);
+
+export const getNiveauFrom = (seuilsNiveaux, key, value) => {
   if (value == null) return null;
-  const s = SEUILS_NIVEAUX[key];
+  const s = seuilsNiveaux[key];
   if (!s) return null;
 
   if (s.type === "max") {
@@ -51,18 +67,15 @@ export const getNiveau = (key, value) => {
   return null;
 };
 
-/** true si hors seuil */
+export const getNiveau = (key, value) => getNiveauFrom(DEFAULT_SEUILS_NIVEAUX, key, value);
+
 export const isEnAlerte = (key, value) => getNiveau(key, value) != null;
 
-/**
- * Couleur Tailwind selon le niveau
- */
 export const couleurNiveau = (niveau) => {
   if (niveau === "critique") return "text-accent-red font-semibold";
-  if (niveau === "warning")  return "text-accent-amber";
+  if (niveau === "warning") return "text-accent-amber";
   return "text-text-secondary";
 };
 
-/** Formate une valeur numérique */
 export const fmt = (v, decimals = 4) =>
-  v != null ? Number(v).toFixed(decimals) : "—";
+  v != null ? Number(v).toFixed(decimals) : "-";

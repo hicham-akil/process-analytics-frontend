@@ -1,5 +1,6 @@
 import SectionHead from "./shared/SectionHead";
-import { fmt, SEUILS } from "../../config/seuils";
+import { fmt } from "../../config/seuils";
+import { useSeuils } from "../../context/SeuilsContext";
 import { Droplets, Flame, Waves, Beaker } from "lucide-react";
 
 function ConsumptionCard({ label, value, unit, seuil, icon: Icon }) {
@@ -7,11 +8,11 @@ function ConsumptionCard({ label, value, unit, seuil, icon: Icon }) {
   const progress = value != null ? Math.min((value / seuil) * 100, 100) : 0;
 
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-background-cards border border-border-subtle p-4 shadow-lg transition-all hover:border-border-medium animate-fade-slide-up group`}>
+    <div className="relative overflow-hidden rounded-xl bg-background-cards border border-border-subtle p-4 shadow-lg transition-all hover:border-border-medium animate-fade-slide-up group">
       <div className={`absolute top-0 left-0 w-full h-[2px] ${
         isAmber ? "bg-accent-amber shadow-[0_2px_10px_rgba(245,158,11,0.3)]" : "bg-accent-green shadow-[0_2px_10px_rgba(16,185,129,0.3)]"
       }`} />
-      
+
       <div className="flex items-start justify-between mb-4">
         <div className={`p-1.5 rounded-lg ${isAmber ? "bg-accent-amber/10 text-accent-amber" : "bg-accent-green/10 text-accent-green"}`}>
           <Icon size={16} />
@@ -35,7 +36,7 @@ function ConsumptionCard({ label, value, unit, seuil, icon: Icon }) {
 
       <div className="space-y-1.5">
         <div className="h-1 w-full bg-background-base rounded-full overflow-hidden">
-          <div 
+          <div
             className={`h-full transition-all duration-1000 ease-out ${isAmber ? "bg-accent-amber" : "bg-accent-green"}`}
             style={{ width: `${progress}%` }}
           />
@@ -50,14 +51,16 @@ function ConsumptionCard({ label, value, unit, seuil, icon: Icon }) {
 }
 
 export default function ConsumptionSection({ data }) {
+  const { seuils } = useSeuils();
+
   return (
     <div className="mb-8">
-      <SectionHead icon={<Waves size={16} />} label="Consommations Spécifiques" />
+      <SectionHead icon={<Waves size={16} />} label="Consommations Specifiques" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <ConsumptionCard label="H₂SO₄"     value={data.consoH2so4}      unit="T/T P₂O₅"   seuil={SEUILS.consoH2so4.max} icon={Beaker} />
-        <ConsumptionCard label="Eau Brute"  value={data.consoEauBrute}   unit="m³/T P₂O₅"  seuil={SEUILS.consoEauBrute.max} icon={Droplets} />
-        <ConsumptionCard label="Phosphates" value={data.consoPhosphates} unit="T/T P₂O₅"   seuil={SEUILS.consoPhosphates.max} icon={Waves} />
-        <ConsumptionCard label="Vapeur"     value={data.consoVapeur}     unit="T/T P₂O₅"   seuil={SEUILS.consoVapeur.max} icon={Flame} />
+        <ConsumptionCard label="H2SO4"      value={data.consoH2so4}      unit="T/T P2O5"  seuil={seuils.consoH2so4.max} icon={Beaker} />
+        <ConsumptionCard label="Eau Brute"  value={data.consoEauBrute}   unit="m3/T P2O5" seuil={seuils.consoEauBrute.max} icon={Droplets} />
+        <ConsumptionCard label="Phosphates" value={data.consoPhosphates} unit="T/T P2O5"  seuil={seuils.consoPhosphates.max} icon={Waves} />
+        <ConsumptionCard label="Vapeur"     value={data.consoVapeur}     unit="T/T P2O5"  seuil={seuils.consoVapeur.max} icon={Flame} />
       </div>
     </div>
   );

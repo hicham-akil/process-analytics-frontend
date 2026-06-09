@@ -1,5 +1,5 @@
 import SectionHead from "./shared/SectionHead";
-import { SEUILS } from "../../config/seuils";
+import { useSeuils } from "../../context/SeuilsContext";
 import { TrendingUp, Target } from "lucide-react";
 
 function YieldCard({ label, keyName, value, minSeuil, icon: Icon }) {
@@ -55,6 +55,8 @@ function YieldCard({ label, keyName, value, minSeuil, icon: Icon }) {
 }
 
 export default function YieldSection({ data }) {
+  const { seuils } = useSeuils();
+
   return (
     <div className="mb-8">
       <SectionHead icon={<TrendingUp size={16} />} label="Rendements Industriels" />
@@ -63,14 +65,14 @@ export default function YieldSection({ data }) {
           keyName="RC"
           label="Rendement Chimique"
           value={data.rc}
-          minSeuil={SEUILS.rc.min}
+          minSeuil={seuils.rc.min}
           icon={Target}
         />
         <YieldCard
           keyName="RI"
           label="Rendement Industrielle"
           value={data.ri}
-          minSeuil={SEUILS.ri.min}
+          minSeuil={seuils.ri.min}
           icon={TrendingUp}
         />
       </div>

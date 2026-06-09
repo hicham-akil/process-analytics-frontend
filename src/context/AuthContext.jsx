@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react";
+import axios from "axios";
 
 const AuthContext = createContext(null);
 
@@ -10,11 +11,13 @@ export function AuthProvider({ children }) {
   const login = useCallback((userData) => {
   setUser(userData);
   window.__authToken = userData.token; 
+  axios.defaults.headers.common.Authorization = `Bearer ${userData.token}`;
 }, []);
 
   const logout = useCallback(() => {
   setUser(null);
   window.__authToken = null; 
+  delete axios.defaults.headers.common.Authorization;
 }, []);
 
   const isLabo   = user?.role === "LABO";

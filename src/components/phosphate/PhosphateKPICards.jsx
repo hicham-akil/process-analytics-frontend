@@ -1,4 +1,5 @@
-import { fmt, SEUILS } from "../../config/seuils";
+import { fmt } from "../../config/seuils";
+import { useSeuils } from "../../context/SeuilsContext";
 import { FlaskConical, Beaker, Weight } from "lucide-react";
 
 function PhosphateKPICard({ label, value, unit, seuil, icon: Icon }) {
@@ -60,6 +61,8 @@ function PhosphateKPICard({ label, value, unit, seuil, icon: Icon }) {
 }
 
 export default function PhosphateKPICards({ data }) {
+  const { seuils } = useSeuils();
+
   if (!data) return null;
 
   return (
@@ -68,7 +71,7 @@ export default function PhosphateKPICards({ data }) {
         label="P₂O₅ Phosphate"
         value={data.p2o5Phosphate}
         unit="%"
-        seuil={SEUILS.p2o5Phosphate}
+        seuil={seuils.p2o5Phosphate}
         icon={FlaskConical}
       />
       <PhosphateKPICard

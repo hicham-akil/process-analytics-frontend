@@ -8,6 +8,7 @@ import {
   Factory, 
   History,
   LogOut,
+  SlidersHorizontal,
   Bell,
   Wifi,
   WifiOff,
@@ -22,6 +23,7 @@ const DASHBOARDS = [
   { icon: FlaskConical,    label: "Analyse Phosphate",  path: "/phosphate", laboOnly: false, color: "text-accent-amber" },
   { icon: Factory,         label: "Analyse Production", path: "/production",laboOnly: false, color: "text-accent-blue" },
   { icon: History,         label: "Historique JFC1",    path: "/historique",laboOnly: false, color: "text-text-secondary" },
+  { icon: SlidersHorizontal,label: "Seuils",             path: "/seuils",    laboOnly: false, color: "text-accent-cyan" },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {

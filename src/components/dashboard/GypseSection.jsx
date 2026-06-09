@@ -1,5 +1,6 @@
 import SectionHead from "./shared/SectionHead";
-import { fmt, SEUILS } from "../../config/seuils";
+import { fmt } from "../../config/seuils";
+import { useSeuils } from "../../context/SeuilsContext";
 import { Hexagon, ArrowDown, ArrowUp } from "lucide-react";
 
 function GypseCard({ label, value, seuil }) {
@@ -50,13 +51,15 @@ function GypseCard({ label, value, seuil }) {
 }
 
 export default function GypseSection({ data }) {
+  const { seuils } = useSeuils();
+
   return (
     <div className="mb-8">
       <SectionHead icon={<Hexagon size={16} />} label="Analyse Pertes Gypse" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <GypseCard label="SE"  value={data.se}     seuil={SEUILS.se.max} />
-        <GypseCard label="SYN" value={data.syn}    seuil={SEUILS.syn.max} />
-        <GypseCard label="INT" value={data.intVal} seuil={SEUILS.intVal.max} />
+        <GypseCard label="SE"  value={data.se}     seuil={seuils.se.max} />
+        <GypseCard label="SYN" value={data.syn}    seuil={seuils.syn.max} />
+        <GypseCard label="INT" value={data.intVal} seuil={seuils.intVal.max} />
       </div>
     </div>
   );
