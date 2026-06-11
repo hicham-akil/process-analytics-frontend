@@ -3,15 +3,24 @@ import { AlertBadge } from "./AlertPanel";
 import LivePill from "./shared/LivePill";
 import Clock from "./shared/Clock";
 import { API_BASE } from "../../config/seuils";
-import { FileDown, Settings, User } from "lucide-react";
+import { FileDown } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 function BoutonRapport() {
+  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const telecharger = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/rapport/journalier`);
+      const res = await fetch(`${API_BASE}/rapport/journalier`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!res.ok) {
+        throw new Error(`Erreur HTTP ${res.status}`);
+      }
+
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement("a");
