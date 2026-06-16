@@ -10,19 +10,19 @@ import { useAuth } from "./AuthContext";
 const SeuilsContext = createContext(null);
 
 export function SeuilsProvider({ children }) {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [seuilsNiveaux, setSeuilsNiveaux] = useState(DEFAULT_SEUILS_NIVEAUX);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const refresh = async () => {
-    if (!token) return;
+    if (!user) return;
 
     setLoading(true);
     setError("");
     try {
-      const data = await getSeuilsApi(token);
+      const data = await getSeuilsApi();
       setItems(data);
       setSeuilsNiveaux(seuilsListToNiveaux(data));
     } catch (err) {
@@ -34,7 +34,7 @@ export function SeuilsProvider({ children }) {
   };
 
   const updateSeuil = async (code, payload) => {
-    const saved = await updateSeuilApi(code, payload, token);
+    const saved = await updateSeuilApi(code, payload);
     const nextItems = items.some(item => item.code === code)
       ? items.map(item => item.code === code ? saved : item)
       : [...items, saved];
@@ -46,7 +46,7 @@ export function SeuilsProvider({ children }) {
 
   useEffect(() => {
     if (user) refresh();
-  }, [user, token]);
+  }, [user]);
 
   return (
     <SeuilsContext.Provider value={{

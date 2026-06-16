@@ -4,17 +4,15 @@ import LivePill from "./shared/LivePill";
 import Clock from "./shared/Clock";
 import { API_BASE } from "../../config/seuils";
 import { FileDown } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
 
 function BoutonRapport() {
-  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const telecharger = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/rapport/journalier`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: "include",
       });
 
       if (!res.ok) {

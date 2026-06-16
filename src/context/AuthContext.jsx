@@ -1,12 +1,26 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import axios from "axios";
+import { logoutApi } from "../services/authService";
 
 const AuthContext = createContext(null);
 const AUTH_STORAGE_KEY = "ocp-auth-user";
 
+axios.defaults.withCredentials = true;
+
+function sanitizeUser(userData) {
+  if (!userData?.username || !userData?.role) return null;
+  return {
+    username: userData.username,
+    role: userData.role,
+  };
+}
+
 function saveStoredUser(userData) {
   try {
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+    const safeUser = sanitizeUser(userData);
+    if (safeUser) {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
+    }
   } catch {
     // Keep the in-memory session working if browser storage is unavailable.
   }
@@ -20,28 +34,23 @@ function clearStoredUser() {
   }
 }
 
-function applyAuthToken(token) {
-  window.__authToken = token;
-
-  if (token) {
-    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-  } else {
-    delete axios.defaults.headers.common.Authorization;
-  }
-}
-
 function getStoredUser() {
   try {
     const rawUser = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!rawUser) return null;
 
     const storedUser = JSON.parse(rawUser);
-    if (!storedUser?.token) {
+    const safeUser = sanitizeUser(storedUser);
+    if (!safeUser) {
       clearStoredUser();
       return null;
     }
 
-    return storedUser;
+    if ("token" in storedUser) {
+      saveStoredUser(safeUser);
+    }
+
+    return safeUser;
   } catch {
     clearStoredUser();
     return null;
@@ -50,29 +59,30 @@ function getStoredUser() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const storedUser = getStoredUser();
-    applyAuthToken(storedUser?.token ?? null);
-    return storedUser;
+    return getStoredUser();
   });
 
   const login = useCallback((userData) => {
-    setUser(userData);
-    saveStoredUser(userData);
-    applyAuthToken(userData.token);
+    const safeUser = sanitizeUser(userData);
+    setUser(safeUser);
+    saveStoredUser(safeUser);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Clear client state even if the server session is already gone.
+    }
     setUser(null);
     clearStoredUser();
-    applyAuthToken(null);
   }, []);
 
   const isLabo   = user?.role === "LABO";
   const isViewer = user?.role === "VIEWER";
-  const token    = user?.token ?? null;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLabo, isViewer, token }}>
+    <AuthContext.Provider value={{ user, login, logout, isLabo, isViewer }}>
       {children}
     </AuthContext.Provider>
   );
