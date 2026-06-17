@@ -16,7 +16,7 @@ const GROUPS = [
 
 const emptyToNumber = (value) => value === "" ? null : Number(value);
 
-function SeuilRow({ seuil, draft, onChange, onSave, saving }) {
+function SeuilRow({ seuil, draft, onChange, onSave, saving, canEdit }) {
   if (!seuil) return null;
 
   const typeLabel = seuil.type === "min" ? "Minimum" : "Maximum";
@@ -44,8 +44,9 @@ function SeuilRow({ seuil, draft, onChange, onSave, saving }) {
           step="0.0001"
           value={draft.warning}
           onChange={(e) => onChange(seuil.code, "warning", e.target.value)}
+          disabled={!canEdit}
           placeholder="Optionnel"
-          className="w-full bg-background-base border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent-blue/70"
+          className="w-full bg-background-base border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent-blue/70 disabled:opacity-70 disabled:cursor-not-allowed"
         />
         <span className="block text-[9px] text-text-muted">{warningHelp}</span>
       </label>
@@ -57,25 +58,32 @@ function SeuilRow({ seuil, draft, onChange, onSave, saving }) {
           step="0.0001"
           value={draft.critique}
           onChange={(e) => onChange(seuil.code, "critique", e.target.value)}
-          className="w-full bg-background-base border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent-blue/70"
+          disabled={!canEdit}
+          className="w-full bg-background-base border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary font-mono focus:outline-none focus:border-accent-blue/70 disabled:opacity-70 disabled:cursor-not-allowed"
         />
       </label>
 
-      <button
-        onClick={() => onSave(seuil)}
-        disabled={saving}
-        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent-blue text-white text-xs font-bold hover:bg-accent-blue/90 disabled:opacity-50 transition-all"
-      >
-        {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-        Sauver
-      </button>
+      {canEdit ? (
+        <button
+          onClick={() => onSave(seuil)}
+          disabled={saving}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-accent-blue text-white text-xs font-bold hover:bg-accent-blue/90 disabled:opacity-50 transition-all"
+        >
+          {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
+          Sauver
+        </button>
+      ) : (
+        <span className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-background-base border border-border-subtle text-xs font-bold text-text-muted uppercase">
+          Lecture seule
+        </span>
+      )}
     </div>
   );
 }
 
 export default function SeuilsDashboard() {
   const { items, seuilsNiveaux, loading, error, refresh, updateSeuil } = useSeuils();
-  const { user } = useAuth();
+  const { user, isLabo } = useAuth();
   const [drafts, setDrafts] = useState({});
   const [savingCode, setSavingCode] = useState("");
   const [message, setMessage] = useState("");
@@ -218,6 +226,7 @@ export default function SeuilsDashboard() {
                       onChange={handleChange}
                       onSave={handleSave}
                       saving={savingCode === code}
+                      canEdit={isLabo}
                     />
                   ))}
                 </div>

@@ -22,7 +22,7 @@ function saveStoredUser(userData) {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(safeUser));
     }
   } catch {
-    // Keep the in-memory session working if browser storage is unavailable.
+    // Ignore storage errors if localStorage is unavailable.
   }
 }
 
