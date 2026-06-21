@@ -1,28 +1,16 @@
 import { useState } from "react";
-import { AlertTriangle, CheckCircle2, Loader2, Lock, UserPlus, Users } from "lucide-react";
-import Sidebar from "../dashboard/Sidebar";
-import Topbar from "../dashboard/Topbar";
-import { AlertPanel } from "../dashboard/AlertPanel";
-import useJFC1Data from "../../hooks/useJFC1Data";
+import { AlertTriangle, CheckCircle2, Loader2, Lock, LogOut, UserPlus, Users } from "lucide-react";
 import { createUserApi } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 
 const INITIAL_FORM = { username: "", password: "", role: "VIEWER" };
 
 export default function UserManagement() {
+  const { user, logout } = useAuth();
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [createdUser, setCreatedUser] = useState(null);
-  const {
-    connected,
-    pulse,
-    lastUpdate,
-    alertesNonAcquittees,
-    showAlertPanel,
-    setShowAlertPanel,
-    acquitter,
-  } = useJFC1Data();
-
   const updateField = (event) => {
     const { name, value } = event.target;
     setForm(current => ({ ...current, [name]: value }));
@@ -50,31 +38,28 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="bg-background-base min-h-screen text-text-primary flex flex-col font-inter">
-      {showAlertPanel && (
-        <AlertPanel
-          alertes={alertesNonAcquittees}
-          onAcquitter={acquitter}
-          onClose={() => setShowAlertPanel(false)}
-        />
-      )}
+    <div className="bg-background-base min-h-screen text-text-primary font-inter">
+      <header className="h-16 border-b border-border-subtle bg-background-surface px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-accent-blue flex items-center justify-center font-bold text-white">J</div>
+          <div>
+            <p className="text-sm font-bold">Administration JFC3</p>
+            <p className="text-[10px] uppercase tracking-widest text-text-muted">Gestion des utilisateurs</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-text-secondary">{user?.username}</span>
+          <button
+            type="button"
+            onClick={logout}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border-subtle text-xs font-bold text-text-secondary hover:text-accent-red hover:border-accent-red/30 transition-all"
+          >
+            <LogOut size={15} /> Deconnexion
+          </button>
+        </div>
+      </header>
 
-      <Topbar
-        connected={connected}
-        pulse={pulse}
-        lastUpdate={lastUpdate}
-        alertesCount={alertesNonAcquittees.length}
-        onToggleAlerts={() => setShowAlertPanel(value => !value)}
-      />
-
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          alertesCount={alertesNonAcquittees.length}
-          connected={connected}
-          onToggleAlerts={() => setShowAlertPanel(value => !value)}
-        />
-
-        <main className="flex-1 overflow-y-auto p-8 ml-16 bg-background-base">
+      <main className="p-8 bg-background-base">
           <div className="max-w-3xl mx-auto space-y-8 animate-fade-slide-up">
             <section className="relative overflow-hidden rounded-2xl bg-background-surface border border-border-medium p-8 shadow-2xl">
               <div className="absolute top-0 right-0 w-80 h-80 bg-accent-green/10 rounded-full blur-[120px] pointer-events-none" />
@@ -180,8 +165,7 @@ export default function UserManagement() {
               </form>
             </section>
           </div>
-        </main>
-      </div>
+      </main>
     </div>
   );
 }

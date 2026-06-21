@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { loginApi } from "../../services/authService";
 import { ShieldCheck, User, Lock, ArrowRight, Loader2, AlertTriangle } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
@@ -17,6 +19,7 @@ export default function LoginPage() {
     try {
       const data = await loginApi(username, password);
       login(data);
+      navigate(data.role === "ADMIN" ? "/admin/users" : "/", { replace: true });
     } catch {
       setError("Identifiants incorrects");
     } finally {

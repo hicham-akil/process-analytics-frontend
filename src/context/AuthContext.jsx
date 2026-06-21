@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
     clearStoredUser();
   }, []);
 
-  const isLabo   = user?.role === "LABO" || user?.role === "ADMIN";
+  const isLabo   = user?.role === "LABO";
   const isViewer = user?.role === "VIEWER";
   const isAdmin  = user?.role === "ADMIN";
 

@@ -1,13 +1,16 @@
 import { useAuth } from "../../context/AuthContext";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { Navigate } from "react-router-dom";
 import LoginPage from "./LoginPage";
 
 export default function ProtectedRoute({ children, requireLabo = false, requireAdmin = false }) {
   const { user, isLabo, isAdmin } = useAuth();
 
   if (!user) return <LoginPage />;
-  if (requireLabo && !isLabo) return <AccessDenied />;
   if (requireAdmin && !isAdmin) return <AccessDenied />;
+  if (requireAdmin) return children;
+  if (isAdmin) return <Navigate to="/admin/users" replace />;
+  if (requireLabo && !isLabo) return <AccessDenied />;
 
   return children;
 }

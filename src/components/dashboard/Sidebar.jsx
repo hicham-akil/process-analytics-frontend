@@ -33,8 +33,9 @@ export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
   const location  = useLocation();
   const { isLabo, isAdmin, user, logout } = useAuth();
 
-  const visibleDashboards = DASHBOARDS.filter(d =>
-    (!d.laboOnly || isLabo) && (!d.adminOnly || isAdmin)
+  const visibleDashboards = DASHBOARDS.filter(d => isAdmin
+    ? d.adminOnly
+    : !d.adminOnly && (!d.laboOnly || isLabo)
   );
 
   return (
