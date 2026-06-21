@@ -78,11 +78,12 @@ export function AuthProvider({ children }) {
     clearStoredUser();
   }, []);
 
-  const isLabo   = user?.role === "LABO";
+  const isLabo   = user?.role === "LABO" || user?.role === "ADMIN";
   const isViewer = user?.role === "VIEWER";
+  const isAdmin  = user?.role === "ADMIN";
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLabo, isViewer }}>
+    <AuthContext.Provider value={{ user, login, logout, isLabo, isViewer, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

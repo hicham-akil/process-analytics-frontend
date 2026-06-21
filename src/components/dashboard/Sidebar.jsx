@@ -13,25 +13,29 @@ import {
   Wifi,
   WifiOff,
   Database,
-  Cpu
+  Cpu,
+  Users
 } from "lucide-react";
 
 const DASHBOARDS = [
-  { icon: LayoutDashboard, label: "Moniteur JFC1",      path: "/",          laboOnly: false, color: "text-accent-blue" },
+  { icon: LayoutDashboard, label: "Moniteur JFC1",      path: "/",          laboOnly: false, adminOnly: false, color: "text-accent-blue" },
   { icon: ClipboardEdit,   label: "Saisie Pertes",      path: "/perte",     laboOnly: true,  color: "text-accent-green" },
   { icon: Activity,        label: "Analyse Gypse",      path: "/gypse",     laboOnly: false, color: "text-accent-cyan" },
   { icon: FlaskConical,    label: "Analyse Phosphate",  path: "/phosphate", laboOnly: false, color: "text-accent-amber" },
   { icon: Factory,         label: "Analyse Production", path: "/production",laboOnly: false, color: "text-accent-blue" },
   { icon: History,         label: "Historique JFC1",    path: "/historique",laboOnly: false, color: "text-text-secondary" },
   { icon: SlidersHorizontal,label: "Seuils",             path: "/seuils",    laboOnly: false, color: "text-accent-cyan" },
+  { icon: Users,           label: "Utilisateurs",        path: "/admin/users", laboOnly: false, adminOnly: true, color: "text-accent-green" },
 ];
 
 export default function Sidebar({ alertesCount, connected, onToggleAlerts }) {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const { isLabo, user, logout } = useAuth();
+  const { isLabo, isAdmin, user, logout } = useAuth();
 
-  const visibleDashboards = DASHBOARDS.filter(d => !d.laboOnly || isLabo);
+  const visibleDashboards = DASHBOARDS.filter(d =>
+    (!d.laboOnly || isLabo) && (!d.adminOnly || isAdmin)
+  );
 
   return (
     <nav className="group fixed left-0 top-0 h-full w-16 hover:w-[220px] transition-all duration-300 ease-in-out bg-background-surface border-r border-border-subtle flex flex-col py-4 z-50 overflow-hidden">

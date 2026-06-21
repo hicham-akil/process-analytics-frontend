@@ -2,11 +2,12 @@ import { useAuth } from "../../context/AuthContext";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import LoginPage from "./LoginPage";
 
-export default function ProtectedRoute({ children, requireLabo = false }) {
-  const { user, isLabo } = useAuth();
+export default function ProtectedRoute({ children, requireLabo = false, requireAdmin = false }) {
+  const { user, isLabo, isAdmin } = useAuth();
 
   if (!user) return <LoginPage />;
   if (requireLabo && !isLabo) return <AccessDenied />;
+  if (requireAdmin && !isAdmin) return <AccessDenied />;
 
   return children;
 }

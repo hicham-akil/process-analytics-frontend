@@ -10,6 +10,7 @@ import ProductionDashboard from './components/production/ProductionDashboard'
 import HistoriqueDashboard from './components/historique/HistoriqueDashboard'
 import PerteDashboard from './components/perte/PerteDashboard'
 import SeuilsDashboard from './components/seuils/SeuilsDashboard'
+import UserManagement from './components/admin/UserManagement'
 
 function App() {
   return (
@@ -50,6 +51,11 @@ function App() {
             <Route path="/perte" element={
               <ProtectedRoute requireLabo>
                 <PerteDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute requireAdmin>
+                <UserManagement />
               </ProtectedRoute>
             } />
           </Routes>

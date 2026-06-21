@@ -13,3 +13,8 @@ export async function loginApi(username, password) {
 export async function logoutApi() {
   await axios.post(`${API_BASE}/auth/logout`, null, { withCredentials: true });
 }
+
+export async function createUserApi(user) {
+  const res = await axios.post(`${API_BASE}/admin/users`, user, { withCredentials: true });
+  return res.data;
+}
